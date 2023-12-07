@@ -27,3 +27,4 @@ Exclude:
 # Learnings From Cupcakes
 - Schemas can have a class Config with attr exclude to allow or deny additional arguments in the payload
 - setting response in the api decorator will type the response for Open API documentation. We'll need to do this for every route otherwise it will use "str" by default
+- be mindful of naming for the schemas. These will be directly used on the generated documentation.
