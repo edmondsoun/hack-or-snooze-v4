@@ -23,3 +23,30 @@ Include (FS):
 Exclude:
 - Users (all)
 - User (delete)
+
+### Data Model
+
+Users
+- username < PK
+- name
+- createdat
+- modifiedat
+
+Stories
+- story_id < PK: UUID auto-generated in PSQL
+- username < FK: user who posted
+- author
+- title
+- url
+- createdat
+- modifiedat
+
+Favorites
+[compound primary key]
+- username
+- story_id
+
+Tokens (MD5 hash username and use first 12 characters)
+[unique together]
+- token < PK
+- username < FK
