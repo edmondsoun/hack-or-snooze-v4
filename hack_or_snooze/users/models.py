@@ -5,7 +5,7 @@ from model_utils.models import TimeStampedModel
 class User(AbstractUser, TimeStampedModel):
     """User Model."""
 
-    username = models.TextField(primary_key=True, max_length=50)
+    # username = models.TextField(primary_key=True, max_length=50)
     # name = models.TextField(max_length=100)
 
     pass
