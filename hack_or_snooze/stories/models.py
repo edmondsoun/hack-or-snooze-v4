@@ -1,28 +1,33 @@
 import uuid
 
 from django.db import models
-from model_utils.models import TimeStampedModel
-
 from django.conf import settings
 
+from model_utils.models import TimeStampedModel
 
-# Create your models here.
 
 class Story(TimeStampedModel, models.Model):
     """Story model."""
 
-    id = models.UUIDField(primary_key=True,
-                          default=uuid.uuid4)
-    user_id = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                on_delete=models.RESTRICT)
-    author = models.TextField()
-    title = models.TextField()
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+    )
+
+    # related_name gives us ability to do things like: User.stories.all()
+    user_id = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.RESTRICT,
+        related_name="stories",
+        verbose_name="User who posted",
+    )
+
+    author = models.CharField(
+        max_length=50,
+    )
+
+    title = models.CharField(
+        max_length=200
+    )
+
     url = models.URLField()
-
-
-    # Because it's a foreign key, we end up with a DB column named "user_id_id".
-    # Leaving the below in case we need to swap names around/alias something:
-
-    # @property
-    # def user_id(self):
-    #     return self.user_id
