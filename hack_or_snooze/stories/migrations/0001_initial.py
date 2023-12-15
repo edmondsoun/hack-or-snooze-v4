@@ -13,7 +13,12 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        # FIXME: I commented this out because it raised a
+        # CircularDependencyError after I squashed migrations as part of
+        # deleting the "favorites" application. Unsure if this will bork things
+        # down the line?
+
+        # migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [

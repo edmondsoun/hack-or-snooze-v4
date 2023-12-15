@@ -15,7 +15,7 @@ class Story(TimeStampedModel, models.Model):
     )
 
     # related_name gives us ability to do things like: User.stories.all()
-    user_id = models.ForeignKey(
+    username = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.RESTRICT,
         related_name="stories",

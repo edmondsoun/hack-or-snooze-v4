@@ -10,11 +10,11 @@ Step 2: Add auth (Django-knox? Default?)
 
 ### Endpoints
 Include (main):
-- Login
-- Signup
-- Favorite (post/delete)
-- Stories (get/post)
-- Story (get)
+- Login ✅
+- Signup ✅
+- Favorite (post/delete) ✅
+- Stories (get/post) ✅
+- Story (get) ✅
 
 Include (FS):
 - User (get/update)
@@ -55,3 +55,9 @@ Tokens (MD5 hash username and use first 12 characters)
 [unique together]
 - token < PK
 - username < FK
+
+
+
+# TODO:
+
+- Seed data for DB
