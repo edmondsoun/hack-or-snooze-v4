@@ -8,8 +8,6 @@ class User(AbstractUser, TimeStampedModel):
     Draws from AbstractUser and TimeStampedModel to produce the following schema:
     #TODO:
 
-
-
     """
 
     pass

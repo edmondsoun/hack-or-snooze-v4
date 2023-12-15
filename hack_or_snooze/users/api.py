@@ -1,4 +1,4 @@
-from typing import List
+# from typing import List
 
 from ninja import ModelSchema, Router
 from .models import User
@@ -10,18 +10,28 @@ class UserSchema(ModelSchema):
         model = User
         fields = ['username']
 
+
+
+# Initial test route:
 # @router.get('/', response=List[UserSchema], summary="PLACEHOLDER")
 # def get_users(request):
 #     users = User.objects.all()
 #     return users
 
-# TODO: ENDPOINT STUBS:
+# STUBS:
 
-@router.get('/{int:user_id}')
-def get_user(request, user_id: int):
+@router.get('/{str:username}')
+def get_user(request, username: str):
     pass
 
-@router.get('/{int:user_id}')
-def update_user(request, user_id: int):
+@router.post('/{str:username}')
+def update_user(request, username: str):
     pass
-    # FIXME: better patch/put?
+    # FIXME: check API for patch/put and swap
+
+
+#### Favorites Endpoints ####
+@router.post('/{str:username}/favorites/{int:favorite_id}')
+def add_favorite(request, username: str, favorite_id: int):
+    pass
+
