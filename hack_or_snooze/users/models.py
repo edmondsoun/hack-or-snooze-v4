@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
 
+
 class User(AbstractUser):
     """User model. Currently draws from AbstractUser with no additional
     columns."""

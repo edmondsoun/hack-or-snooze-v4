@@ -1,14 +1,40 @@
-# from typing import List
+from typing import List
 
 from ninja import ModelSchema, Router
+from ninja.security import APIKeyHeader
+
 from .models import User
 
 router = Router()
+
+class ApiKey(APIKeyHeader):
+
+    param_name = "token"
+
+    def authenticate(self, request, key):
+        """TODO:"""
+        if key == "supersecret":
+            return key
+
+        # Step 1: split username and hash
+        # Step 2: rehash username and check against existing hash
+        # Step 3: if they match, return, else, Unauthorized
+
+header_key = ApiKey()
+
+
+######## SCHEMA ################################################################
 
 class UserSchema(ModelSchema):
     class Meta:
         model = User
         fields = ['username']
+
+
+
+
+
+
 
 
 ######## AUTH ##################################################################
@@ -25,6 +51,8 @@ def signup(request):
 
     Authentication: none
     """
+
+    # FIXME:
     pass
 
 
@@ -46,10 +74,12 @@ def login(request):
 
 ######## USERS #################################################################
 # Initial test route:
-# @router.get('/', response=List[UserSchema], summary="PLACEHOLDER")
-# def get_users(request):
-#     users = User.objects.all()
-#     return users
+@router.get('/', response=List[UserSchema], summary="PLACEHOLDER", auth=header_key)
+def get_users(request):
+    print("TESTING", request.auth)
+
+    users = User.objects.all()
+    return users
 
 
 @router.get('/{str:username}')
