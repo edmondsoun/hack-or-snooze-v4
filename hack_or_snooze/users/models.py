@@ -8,6 +8,11 @@ class User(AbstractUser):
     """User model. Currently draws from AbstractUser with no additional
     columns."""
 
+    username = models.CharField(
+        primary_key=True,
+        max_length=150,
+    )
+
 
 class Favorite(models.Model):
     """Favorite model.

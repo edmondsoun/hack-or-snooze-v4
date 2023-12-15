@@ -18,7 +18,7 @@ class Story(TimeStampedModel, models.Model):
     username = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.RESTRICT,
-        related_name="stories",
+        related_name="stories_old",
         verbose_name="User who posted",
     )
 

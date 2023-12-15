@@ -6,7 +6,7 @@ router = Router()
 class StorySchema(ModelSchema):
     class Meta:
         model = Story
-        fields =  ['id', 'user_id', 'author', 'created', 'modified']
+        fields =  ['id', 'author', 'created', 'modified']
 
 
 @router.post('/')
