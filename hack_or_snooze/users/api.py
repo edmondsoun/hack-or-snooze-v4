@@ -4,16 +4,18 @@ from ninja import ModelSchema, Router
 from ninja.security import APIKeyHeader
 
 from .models import User
-from .utils import check_token
+from .utils import generate_token, check_token
 
 router = Router()
 
 class ApiKey(APIKeyHeader):
+    """Class to provide authentication via token in header."""
 
     param_name = "token"
 
     def authenticate(self, request, key):
-        """Parse token of submission and check validity.
+        """
+        Parse token of submission and check validity.
 
         Tokens are formatted like:
             "<username>:<hash>"
@@ -35,7 +37,6 @@ class ApiKey(APIKeyHeader):
 
 
 token_header = ApiKey()
-
 
 ######## SCHEMA ################################################################
 
@@ -60,8 +61,7 @@ def signup(request):
     Authentication: none
     """
 
-    # FIXME:
-    pass
+    # TODO: user.set_password
 
 
 @router.post('/login')
@@ -77,7 +77,9 @@ def login(request):
 
     Authentication: none
     """
-    pass
+
+    # TODO: user.check_password
+
 
 
 ######## USERS #################################################################

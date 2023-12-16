@@ -1,9 +1,28 @@
 from hashlib import md5
 
+# Author's Note: don't do this in real life :)
 
-def check_token(username, token):
-    """Helper function to re-hash username and check against
-    user-submitted token."""
+def generate_token(username):
+    """
+    Generate an auth token by hashing username and concatenating username
+    with truncated version of hash.
+
+    EX: "fluffy" -> "fluffy:ce7bcda695c3"
+    """
+    print("in generate_token")
+
+    hash = generate_hash(username)
+
+    return f"{username}:{hash}"
+
+
+def generate_hash(username):
+    """
+    Hash username and return first 12 characters.
+
+    EX: "fluffy" -> "ce7bcda695c3"
+    """
+    print("in generate_hash")
 
     encoded_username = username.encode()
     h = md5()
@@ -12,5 +31,16 @@ def check_token(username, token):
 
     truncated_hash = hashed_username[0:12]
 
-    print("DEBUGGING HASH CHECK", truncated_hash)
-    return truncated_hash == token
+    return truncated_hash
+
+
+def check_token(username, token):
+    """
+    Re-hash username and check against user-submitted token.
+
+    Returns a boolean.
+    """
+    print("in check_token")
+
+    return generate_hash(username) == token
+
