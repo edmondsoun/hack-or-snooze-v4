@@ -4,6 +4,7 @@ from ninja import ModelSchema, Router
 from ninja.security import APIKeyHeader
 
 from .models import User
+from .utils import check_token
 
 router = Router()
 
@@ -12,15 +13,28 @@ class ApiKey(APIKeyHeader):
     param_name = "token"
 
     def authenticate(self, request, key):
-        """TODO:"""
-        if key == "supersecret":
-            return key
+        """Parse token of submission and check validity.
 
-        # Step 1: split username and hash
-        # Step 2: rehash username and check against existing hash
-        # Step 3: if they match, return, else, Unauthorized
+        Tokens are formatted like:
+            "<username>:<hash>"
 
-header_key = ApiKey()
+        On success, returns username.
+
+        On failure, returns None. Error message JSON is automatically generated:
+            {"detail": "Unauthorized"}
+        """
+        print("in authenticate")
+
+        try:
+            username, token = key.split(":")
+        except ValueError:
+            return None
+
+        if check_token(username, token):
+            return username
+
+
+token_header = ApiKey()
 
 
 ######## SCHEMA ################################################################
@@ -29,12 +43,6 @@ class UserSchema(ModelSchema):
     class Meta:
         model = User
         fields = ['username']
-
-
-
-
-
-
 
 
 ######## AUTH ##################################################################
@@ -74,7 +82,7 @@ def login(request):
 
 ######## USERS #################################################################
 # Initial test route:
-@router.get('/', response=List[UserSchema], summary="PLACEHOLDER", auth=header_key)
+@router.get('/', response=List[UserSchema], summary="PLACEHOLDER", auth=token_header)
 def get_users(request):
     print("TESTING", request.auth)
 
