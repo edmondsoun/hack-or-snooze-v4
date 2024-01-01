@@ -5,22 +5,17 @@ from django.core.validators import RegexValidator
 
 from ninja.errors import AuthenticationError
 
-# From: https://stackoverflow.com/questions/17165147/how-can-i-make-a-django-form-field-contain-only-alphanumeric-characters
-# FIXME: this doesn't work right now, circle back to fix
-alphanumeric = RegexValidator(
-    regex=r'^[0-9a-zA-Z]*$',
-    message='Only alphanumeric characters are allowed.'
-)
-
 
 class User(AbstractUser):
     """User model. Currently draws from AbstractUser with no additional
     columns."""
 
+    # TODO: model should include DB constraints on username pattern to mirror
+    # schema validation
+
     username = models.CharField(
         primary_key=True,
         max_length=150,
-        validators=[alphanumeric],
     )
 
     @classmethod
@@ -42,7 +37,7 @@ class User(AbstractUser):
     def login(cls, user_data):
         """Sign up a new user with provided credentials.
 
-        Returns user instance or TODO:"""
+        Returns user instance or raises error if credentials are incorrect."""
 
         user = cls.objects.get(username=user_data.username)
 

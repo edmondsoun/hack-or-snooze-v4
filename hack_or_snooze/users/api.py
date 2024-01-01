@@ -1,4 +1,5 @@
 from typing import List
+from pydantic import constr
 
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,6 +12,7 @@ from .models import User
 from .utils import generate_token, check_token
 
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
+ALPHANUMERIC_STRING = r'^[0-9a-zA-Z]*$'
 
 router = Router()
 
@@ -61,6 +63,8 @@ class LoginIn(ModelSchema):
 
 
 class SignupIn(ModelSchema):
+    username: constr(pattern=ALPHANUMERIC_STRING)
+
     class Meta:
         model = User
         fields = ['username', 'password', 'first_name', 'last_name']
