@@ -3,7 +3,7 @@
 # RUNNING IMPORTANT NOTES!
 
 - Token now must be sent in the *header*, not the body.
-- `request.auth` stores the return value our ApiKey auth class
+- `request.auth` stores the return value our ApiKey auth class (currently "username")
 
 # TODO:
 
