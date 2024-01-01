@@ -37,6 +37,7 @@ class ApiKey(APIKeyHeader):
         print("in authenticate")
 
         if check_token(token):
+            username = token.split(":")[0]
             return username
 
 
