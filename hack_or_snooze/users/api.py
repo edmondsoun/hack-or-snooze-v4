@@ -1,10 +1,16 @@
 from typing import List
 
+from django.db.utils import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
+
 from ninja import ModelSchema, Schema, Router
 from ninja.security import APIKeyHeader
+from ninja.errors import AuthenticationError
 
 from .models import User
 from .utils import generate_token, check_token
+
+FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
 
 router = Router()
 
@@ -14,7 +20,7 @@ class ApiKey(APIKeyHeader):
 
     param_name = "token"
 
-    def authenticate(self, request, key):
+    def authenticate(self, request, token):
         """
         Parse token of submission and check validity.
 
@@ -28,18 +34,15 @@ class ApiKey(APIKeyHeader):
         """
         print("in authenticate")
 
-        try:
-            username, token = key.split(":")
-        except ValueError:
-            return None
-
-        if check_token(username, token):
+        if check_token(token):
             return username
 
 
 token_header = ApiKey()
 
 ######## SCHEMA ################################################################
+
+# TODO: this is a placeholder schema for prototyping and will likely be removed
 
 
 class UserSchema(ModelSchema):
@@ -53,21 +56,39 @@ class LoginIn(ModelSchema):
         model = User
         fields = ['username', 'password']
 
+    class Config:
+        extra = FORBID_EXTRA_FIELDS_KEYWORD
 
-class SignupIn(Schema):
-    name: str
-    username: str
-    password: str
+
+class SignupIn(ModelSchema):
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'first_name', 'last_name']
+
+    class Config:
+        extra = FORBID_EXTRA_FIELDS_KEYWORD
+
+
+class DuplicateUser(Schema):
+    error: str
+
+
+class Unauthorized(Schema):
+    error: str
+
+
+class AuthTokenOut(Schema):
+    token: str
 
 
 ######## AUTH ##################################################################
 
-@router.post('/signup')
+
+@router.post('/signup', response={200: AuthTokenOut, 422: DuplicateUser})
 def signup(request, data: SignupIn):
     """
     Handle user signup. User must send:
         {
-            "name": "Test User",
             "username": "test",
             "password": "password"
         }
@@ -77,39 +98,56 @@ def signup(request, data: SignupIn):
             "token": "test:098f6bcd4621"
         }
 
-    On failure, return error JSON.
+    On failure, return error JSON:
 
     Authentication: none
     """
-    # TODO:
 
-    return "leaving register"
+    try:
+        user = User.signup(user_data=data)
+    except IntegrityError:
+        return 422, {"error": "Username already exists."}
 
-    # TODO: user.set_password
+    token = generate_token(user.username)
+
+    return {"token": token}
 
 
-@router.post('/login')
+@router.post('/login', response={200: AuthTokenOut, 401: Unauthorized})
 def login(request, data: LoginIn):
     """
-    Handle user signup. User must send:
-        # TODO:
+    Handle user login. User must send:
+        {
+            "username":"test",
+            "password":"password"
+        }
 
     On success, return auth token and user information:
-        # TODO: describe shape of JSON
+        {
+            "token": "test:098f6bcd4621"
+        }
 
-    On failure, return error JSON.
+    On failure, return error JSON:
+        {
+            "error": "Invalid credentials."
+        }
 
     Authentication: none
     """
 
-    username, password = data.username, data.password
+    try:
+        user = User.login(user_data=data)
+    except (ObjectDoesNotExist, AuthenticationError):
+        return 401, {"error": "Invalid credentials."}
 
-    user = User.objects.get(username=username)
-    if user.check_password(password):
-        return "Success!"
+    token = generate_token(user.username)
 
-    # TODO: return unauthorized
+    return {"token": token}
 
+    # if user:
+    #     return user
+    # else:
+    #     return 401, {"error": "unauthorized"}
 
 
 ######## USERS #################################################################

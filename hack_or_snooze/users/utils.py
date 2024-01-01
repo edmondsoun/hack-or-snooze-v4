@@ -28,6 +28,7 @@ def generate_hash(username):
     encoded_username = username.encode()
     h = md5()
     h.update(encoded_username)
+    # TODO: check if we can limit digest without manually truncating?
     hashed_username = h.hexdigest()
 
     truncated_hash = hashed_username[0:12]
@@ -36,7 +37,7 @@ def generate_hash(username):
     return truncated_hash
 
 
-def check_token(username, token):
+def check_token(token):
     """
     Re-hash username and check against user-submitted token.
 
@@ -44,5 +45,10 @@ def check_token(username, token):
     """
     print("in check_token")
 
-    return generate_hash(username) == token
+    try:
+        username, hash = token.split(":")
+    except ValueError:
+        return False
+
+    return generate_hash(username) == hash
 
