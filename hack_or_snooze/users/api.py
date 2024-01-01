@@ -1,12 +1,13 @@
 from typing import List
 
-from ninja import ModelSchema, Router
+from ninja import ModelSchema, Schema, Router
 from ninja.security import APIKeyHeader
 
 from .models import User
 from .utils import generate_token, check_token
 
 router = Router()
+
 
 class ApiKey(APIKeyHeader):
     """Class to provide authentication via token in header."""
@@ -40,32 +41,55 @@ token_header = ApiKey()
 
 ######## SCHEMA ################################################################
 
+
 class UserSchema(ModelSchema):
     class Meta:
         model = User
         fields = ['username']
 
 
+class LoginIn(ModelSchema):
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+
+class SignupIn(Schema):
+    name: str
+    username: str
+    password: str
+
+
 ######## AUTH ##################################################################
 
 @router.post('/signup')
-def signup(request):
+def signup(request, data: SignupIn):
     """
     Handle user signup. User must send:
-        # TODO:
+        {
+            "name": "Test User",
+            "username": "test",
+            "password": "password"
+        }
 
     On success, return auth token:
+        {
+            "token": "test:098f6bcd4621"
+        }
 
     On failure, return error JSON.
 
     Authentication: none
     """
+    # TODO:
+
+    return "leaving register"
 
     # TODO: user.set_password
 
 
 @router.post('/login')
-def login(request):
+def login(request, data: LoginIn):
     """
     Handle user signup. User must send:
         # TODO:
@@ -78,7 +102,13 @@ def login(request):
     Authentication: none
     """
 
-    # TODO: user.check_password
+    username, password = data.username, data.password
+
+    user = User.objects.get(username=username)
+    if user.check_password(password):
+        return "Success!"
+
+    # TODO: return unauthorized
 
 
 

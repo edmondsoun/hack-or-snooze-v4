@@ -1,6 +1,7 @@
 from hashlib import md5
 
-# Author's Note: don't do this in real life :)
+# Author's note: this approach to auth is for didactic purposes only. Never do
+# this in real life!
 
 def generate_token(username):
     """
@@ -30,6 +31,7 @@ def generate_hash(username):
     hashed_username = h.hexdigest()
 
     truncated_hash = hashed_username[0:12]
+    print("truncated hash:", truncated_hash)
 
     return truncated_hash
 
