@@ -72,6 +72,8 @@ class SignupIn(ModelSchema):
     username: constr(pattern=ALPHANUMERIC_STRING_PATTERN)
 
     # TODO: decide what fields we want to require and populate into DB
+    # TODO: Nice to have: remove email from the model since we will not
+    # be using it
     class Meta:
         model = User
         fields = ['username', 'password', 'first_name', 'last_name']
@@ -91,11 +93,11 @@ class LoginIn(ModelSchema):
 
 class SignupOut(Schema):
     # FIXME: can we use global variables as key names in schema?
-    AUTH_KEY: str
+    token: str
 
 
 class LoginOut(Schema):
-    AUTH_KEY: str
+    token: str
     # user: UserOut
 
 
