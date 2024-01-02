@@ -51,6 +51,23 @@ token_header = ApiKey()
 ######## SCHEMA ################################################################
 
 
+# class UserOut(ModelSchema):
+#     stories: List[StorySchema]
+#     favorites: List[StorySchema]
+
+#     class Meta:
+#         model = User
+#         fields = ['username', 'password',
+#                   'first_name', 'last_name', 'date_joined']
+
+
+# FIXME: remove this boilerplate resp schema once real versions are complete
+class UserSchema(ModelSchema):
+    class Meta:
+        model = User
+        fields = ['username']
+
+
 class SignupIn(ModelSchema):
     username: constr(pattern=ALPHANUMERIC_STRING_PATTERN)
 
@@ -73,21 +90,13 @@ class LoginIn(ModelSchema):
 
 
 class SignupOut(Schema):
+    # FIXME: can we use global variables as key names in schema?
     AUTH_KEY: str
 
 
 class LoginOut(Schema):
     AUTH_KEY: str
-
-
-class UserOut(ModelSchema):
-    stories: List[StorySchema]
-    favorites: List[StorySchema]
-
-    class Meta:
-        model = User
-        fields = ['username', 'password',
-                  'first_name', 'last_name', 'date_joined']
+    # user: UserOut
 
 
 class DuplicateUser(Schema):
@@ -133,7 +142,7 @@ def signup(request, data: SignupIn):
     return {AUTH_KEY: token}
 
 
-@router.post('/login', response={200: UserOut, 401: Unauthorized})
+@router.post('/login', response={200: LoginOut, 401: Unauthorized})
 def login(request, data: LoginIn):
     """
     Handle user login. User must send:
@@ -167,13 +176,6 @@ def login(request, data: LoginIn):
 
 
 ######## USERS #################################################################
-
-# FIXME: remove this boilerplate resp schema once real versions are complete
-class UserSchema(ModelSchema):
-    class Meta:
-        model = User
-        fields = ['username']
-
 # Initial test route:
 
 
