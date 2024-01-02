@@ -57,6 +57,7 @@ class Favorite(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.RESTRICT,
+        related_name='favorites',
     )
 
     story = models.ForeignKey(
