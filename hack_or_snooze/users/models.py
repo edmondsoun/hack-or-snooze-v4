@@ -11,7 +11,7 @@ class User(AbstractUser):
     columns."""
 
     # TODO: model should include DB constraints on username pattern to mirror
-    # schema validation
+    # schema validation?
 
     username = models.CharField(
         primary_key=True,
@@ -35,7 +35,7 @@ class User(AbstractUser):
 
     @classmethod
     def login(cls, user_data):
-        """Sign up a new user with provided credentials.
+        """Log in an existing user with provided credentials.
 
         Returns user instance or raises error if credentials are incorrect."""
 

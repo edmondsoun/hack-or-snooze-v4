@@ -11,8 +11,13 @@ from ninja.errors import AuthenticationError
 from .models import User
 from .utils import generate_token, check_token
 
+from stories.api import StorySchema
+
+
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
-ALPHANUMERIC_STRING = r'^[0-9a-zA-Z]*$'
+AUTH_KEY = "token"
+ALPHANUMERIC_STRING_PATTERN = r'^[0-9a-zA-Z]*$'
+
 
 router = Router()
 
@@ -20,11 +25,11 @@ router = Router()
 class ApiKey(APIKeyHeader):
     """Class to provide authentication via token in header."""
 
-    param_name = "token"
+    param_name = AUTH_KEY
 
     def authenticate(self, request, token):
         """
-        Parse token of submission and check validity.
+        Parse token submission and check validity.
 
         Tokens are formatted like:
             "<username>:<hash>"
@@ -45,13 +50,17 @@ token_header = ApiKey()
 
 ######## SCHEMA ################################################################
 
-# TODO: this is a placeholder schema for prototyping and will likely be removed
 
+class SignupIn(ModelSchema):
+    username: constr(pattern=ALPHANUMERIC_STRING_PATTERN)
 
-class UserSchema(ModelSchema):
+    # TODO: decide what fields we want to require and populate into DB
     class Meta:
         model = User
-        fields = ['username']
+        fields = ['username', 'password', 'first_name', 'last_name']
+
+    class Config:
+        extra = FORBID_EXTRA_FIELDS_KEYWORD
 
 
 class LoginIn(ModelSchema):
@@ -63,15 +72,22 @@ class LoginIn(ModelSchema):
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
 
-class SignupIn(ModelSchema):
-    username: constr(pattern=ALPHANUMERIC_STRING)
+class SignupOut(Schema):
+    AUTH_KEY: str
+
+
+class LoginOut(Schema):
+    AUTH_KEY: str
+
+
+class UserOut(ModelSchema):
+    stories: List[StorySchema]
+    favorites: List[StorySchema]
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'first_name', 'last_name']
-
-    class Config:
-        extra = FORBID_EXTRA_FIELDS_KEYWORD
+        fields = ['username', 'password',
+                  'first_name', 'last_name', 'date_joined']
 
 
 class DuplicateUser(Schema):
@@ -82,14 +98,10 @@ class Unauthorized(Schema):
     error: str
 
 
-class AuthTokenOut(Schema):
-    token: str
-
-
 ######## AUTH ##################################################################
 
 
-@router.post('/signup', response={200: AuthTokenOut, 422: DuplicateUser})
+@router.post('/signup', response={200: SignupOut, 422: DuplicateUser})
 def signup(request, data: SignupIn):
     """
     Handle user signup. User must send:
@@ -103,7 +115,10 @@ def signup(request, data: SignupIn):
             "token": "test:098f6bcd4621"
         }
 
-    On failure, return error JSON:
+    On failure for repeat username, return error JSON:
+        {
+            "error": "Username already exists."
+        }
 
     Authentication: none
     """
@@ -115,10 +130,10 @@ def signup(request, data: SignupIn):
 
     token = generate_token(user.username)
 
-    return {"token": token}
+    return {AUTH_KEY: token}
 
 
-@router.post('/login', response={200: AuthTokenOut, 401: Unauthorized})
+@router.post('/login', response={200: UserOut, 401: Unauthorized})
 def login(request, data: LoginIn):
     """
     Handle user login. User must send:
@@ -129,10 +144,11 @@ def login(request, data: LoginIn):
 
     On success, return auth token and user information:
         {
-            "token": "test:098f6bcd4621"
+            "token": "test:098f6bcd4621",
+            # TODO: user info
         }
 
-    On failure, return error JSON:
+    On failure with bad credentials, return error JSON:
         {
             "error": "Invalid credentials."
         }
@@ -147,16 +163,20 @@ def login(request, data: LoginIn):
 
     token = generate_token(user.username)
 
-    return {"token": token}
-
-    # if user:
-    #     return user
-    # else:
-    #     return 401, {"error": "unauthorized"}
+    return {AUTH_KEY: token}
 
 
 ######## USERS #################################################################
+
+# FIXME: remove this boilerplate resp schema once real versions are complete
+class UserSchema(ModelSchema):
+    class Meta:
+        model = User
+        fields = ['username']
+
 # Initial test route:
+
+
 @router.get('/', response=List[UserSchema], summary="PLACEHOLDER", auth=token_header)
 def get_users(request):
     print("TESTING", request.auth)
