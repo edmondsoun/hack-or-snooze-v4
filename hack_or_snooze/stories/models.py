@@ -9,6 +9,9 @@ from model_utils.models import TimeStampedModel
 class Story(TimeStampedModel, models.Model):
     """Story model."""
 
+    class Meta:
+        verbose_name_plural = 'Stories'
+
     id = models.UUIDField(
         default=uuid.uuid4,
         primary_key=True,
@@ -18,7 +21,7 @@ class Story(TimeStampedModel, models.Model):
     username = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.RESTRICT,
-        related_name="stories_old",
+        related_name="stories",
         verbose_name="User who posted",
     )
 
