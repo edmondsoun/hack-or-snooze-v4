@@ -5,45 +5,47 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
 from ninja import ModelSchema, Schema, Router
-from ninja.security import APIKeyHeader
 from ninja.errors import AuthenticationError
 
 from .models import User
-from .utils import generate_token, check_token
+from .utils import generate_token
+from .auth_utils import AUTH_KEY, ApiKey
 
 from stories.api import StorySchema
 
 
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
-AUTH_KEY = "token"
+
 ALPHANUMERIC_STRING_PATTERN = r'^[0-9a-zA-Z]*$'
 
 
 router = Router()
 
+# FIXME: Nice to do: move this to some sort of core location rather
+# than in the user file
 
-class ApiKey(APIKeyHeader):
-    """Class to provide authentication via token in header."""
+# class ApiKey(APIKeyHeader):
+#     """Class to provide authentication via token in header."""
 
-    param_name = AUTH_KEY
+#     param_name = AUTH_KEY
 
-    def authenticate(self, request, token):
-        """
-        Parse token submission and check validity.
+#     def authenticate(self, request, token):
+#         """
+#         Parse token submission and check validity.
 
-        Tokens are formatted like:
-            "<username>:<hash>"
+#         Tokens are formatted like:
+#             "<username>:<hash>"
 
-        On success, returns username.
+#         On success, returns username.
 
-        On failure, returns None. Error message JSON is automatically generated:
-            {"detail": "Unauthorized"}
-        """
-        print("in authenticate")
+#         On failure, returns None. Error message JSON is automatically generated:
+#             {"detail": "Unauthorized"}
+#         """
+#         print("in authenticate")
 
-        if check_token(token):
-            username = token.split(":")[0]
-            return username
+#         if check_token(token):
+#             username = token.split(":")[0]
+#             return username
 
 
 token_header = ApiKey()
@@ -51,14 +53,16 @@ token_header = ApiKey()
 ######## SCHEMA ################################################################
 
 
-# class UserOut(ModelSchema):
-#     stories: List[StorySchema]
-#     favorites: List[StorySchema]
+class UserOut(ModelSchema):
+    stories: List[StorySchema]
+    # favorites: List[StorySchema]
 
-#     class Meta:
-#         model = User
-#         fields = ['username', 'password',
-#                   'first_name', 'last_name', 'date_joined']
+    class Meta:
+        model = User
+        # for adding a field, it must literally exist on the model, it can't
+        # just be a relationship
+        fields = ['username', 'password',
+                  'first_name', 'last_name', 'date_joined']
 
 
 # FIXME: remove this boilerplate resp schema once real versions are complete
@@ -189,14 +193,16 @@ def get_users(request):
     return users
 
 
-@router.get('/{str:username}')
+@router.get('/{str:username}', response=UserOut, summary="PLACEHOLDER", auth=token_header)
 def get_user(request, username: str):
     """Get information about a single user.
 
     Authentication: token
     Authorization: same user or admin
     """
-    # TODO:
+    user = User.objects.get(username=username)
+
+    return user
 
 
 @router.post('/{str:username}')
