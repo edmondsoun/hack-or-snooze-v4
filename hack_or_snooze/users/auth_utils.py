@@ -1,5 +1,8 @@
 from .utils import check_token
 from ninja.security import APIKeyHeader
+
+from .models import User
+
 AUTH_KEY = "token"
 
 
@@ -24,4 +27,6 @@ class ApiKey(APIKeyHeader):
 
         if check_token(token):
             username = token.split(":")[0]
-            return username
+
+            user = User.objects.get(username=username)
+            return user

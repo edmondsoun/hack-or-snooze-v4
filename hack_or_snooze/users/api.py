@@ -23,7 +23,7 @@ token_header = ApiKey()
 ######## SCHEMA ################################################################
 
 
-class UserOut(ModelSchema):
+class UserOutput(ModelSchema):
     stories: List[StorySchema]
     favorites: List[StorySchema]
 
@@ -34,7 +34,7 @@ class UserOut(ModelSchema):
         fields = ['username', 'first_name', 'last_name', 'date_joined']
 
 
-class SignupIn(ModelSchema):
+class SignupInput(ModelSchema):
     username: constr(pattern=ALPHANUMERIC_STRING_PATTERN)
 
     class Meta:
@@ -45,7 +45,7 @@ class SignupIn(ModelSchema):
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
 
-class LoginIn(ModelSchema):
+class LoginInput(ModelSchema):
     class Meta:
         model = User
         fields = ['username', 'password']
@@ -54,9 +54,9 @@ class LoginIn(ModelSchema):
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
 
-class AuthOut(Schema):
+class AuthOutput(Schema):
     token: str
-    user: UserOut
+    user: UserOutput
 
 
 class DuplicateUser(Schema):
@@ -77,8 +77,8 @@ class Unauthorized(Schema):
 ######## AUTH ##################################################################
 
 
-@router.post('/signup', response={200: AuthOut, 422: DuplicateUser})
-def signup(request, data: SignupIn):
+@router.post('/signup', response={200: AuthOutput, 422: DuplicateUser})
+def signup(request, data: SignupInput):
     """
     Handle user signup. User must send:
         {
@@ -112,8 +112,8 @@ def signup(request, data: SignupIn):
     }
 
 
-@router.post('/login', response={200: AuthOut, 401: Unauthorized})
-def login(request, data: LoginIn):
+@router.post('/login', response={200: AuthOutput, 401: Unauthorized})
+def login(request, data: LoginInput):
     """
     Handle user login. User must send:
         {
@@ -140,7 +140,7 @@ def login(request, data: LoginIn):
     except (ObjectDoesNotExist, AuthenticationError):
         return 401, {"error": "Invalid credentials."}
 
-    token =  generate_token(user.username)
+    token = generate_token(user.username)
 
     return {
         AUTH_KEY: token,
@@ -160,27 +160,45 @@ def login(request, data: LoginIn):
 #     return users
 
 
-@router.get('/{str:username}', response=UserOut, summary="PLACEHOLDER", auth=token_header)
+@router.get(
+    '/{str:username}',
+    response={200: UserOutput, 401: Unauthorized},
+    summary="PLACEHOLDER",
+    auth=token_header
+)
 def get_user(request, username: str):
     """Get information about a single user.
 
     Authentication: token
     Authorization: same user or admin
     """
+    curr_user = request.auth
 
-    user = User.objects.get(username=username)
-    return user
+    if username != curr_user.username and curr_user.is_staff is not True:
+        return 401, {"error": "Unauthorized."}
+
+    return User.objects.get(username=username)
 
 
-@router.post('/{str:username}')
+@router.patch(
+    '/{str:username}',
+    response={200: UserOutput, 401: Unauthorized},
+    summary="PLACEHOLDER",
+    auth=token_header
+)
 def update_user(request, username: str):
     """Update a single user.
 
     Authentication: token
     Authorization: same user or admin
     """
+    curr_user = request.auth
+
+    if username != curr_user.username and curr_user.is_staff is not True:
+        return 401, {"error": "Unauthorized."}
+
     # TODO:
-    # FIXME: check API for patch/put and swap
+
 
 
 ######## FAVORIRTES ############################################################
