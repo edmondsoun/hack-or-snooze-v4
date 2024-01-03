@@ -54,14 +54,9 @@ class LoginIn(ModelSchema):
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
 
-class SignupOut(Schema):
-    # FIXME: can we use global variables as key names in schema?
+class AuthOut(Schema):
     token: str
-
-
-class LoginOut(Schema):
-    token: str
-    # user: UserOut
+    user: UserOut
 
 
 class DuplicateUser(Schema):
@@ -82,7 +77,7 @@ class Unauthorized(Schema):
 ######## AUTH ##################################################################
 
 
-@router.post('/signup', response={200: SignupOut, 422: DuplicateUser})
+@router.post('/signup', response={200: AuthOut, 422: DuplicateUser})
 def signup(request, data: SignupIn):
     """
     Handle user signup. User must send:
@@ -111,10 +106,13 @@ def signup(request, data: SignupIn):
 
     token = generate_token(user.username)
 
-    return {AUTH_KEY: token}
+    return {
+        AUTH_KEY: token,
+        "user": user
+    }
 
 
-@router.post('/login', response={200: LoginOut, 401: Unauthorized})
+@router.post('/login', response={200: AuthOut, 401: Unauthorized})
 def login(request, data: LoginIn):
     """
     Handle user login. User must send:
@@ -126,7 +124,7 @@ def login(request, data: LoginIn):
     On success, return auth token and user information:
         {
             "token": "test:098f6bcd4621",
-            # TODO: user info
+            "user": see UserOut Schema
         }
 
     On failure with bad credentials, return error JSON:
@@ -142,9 +140,12 @@ def login(request, data: LoginIn):
     except (ObjectDoesNotExist, AuthenticationError):
         return 401, {"error": "Invalid credentials."}
 
-    token = generate_token(user.username)
+    token =  generate_token(user.username)
 
-    return {AUTH_KEY: token}
+    return {
+        AUTH_KEY: token,
+        "user": user
+    }
 
 
 ######## USERS #################################################################
