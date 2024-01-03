@@ -7,10 +7,11 @@
 
 # TODO:
 
-- Seed data
+- Seed data for production
 - Set up admin to allow quick post/user deletes
 - Way to handle dumping the DB (solved by Django-Ninja?)
 - Write tests
+  - Set up factories for testing
 
 ### Endpoints
 Include (main):
@@ -28,22 +29,45 @@ Exclude:
 - Users (all)
 - User (delete) []
 
-Users (inherets from AbstractUser):
-- username < PK
+# Test Scaffolding
 
-Stories
-- id < PK: UUID auto-generated in PSQL
-- username < FK: user who posted
-- author
-- title
-- url
-- created
-- modified
+## AUTH
+### Views
+- POST /api/users/signup
+  - signup success
+  - signup failure (missing required data)
+  - signup failure (extra fields included)
+  - signup failure (username already exists)
+  - signup failure (malformed username)
 
-Favorites
-- username < FK: users
-- story_id < FK: stories
-(unique together)
+- POST /api/users/login
+  - login success
+  - login failure (missing required data)
+  - login failure (extra fields included)
+  - login failure (non-existant username)
+  - login failure (username exists; wrong password)
+
+### Utils (unit testing)
+- check_token
+- generate_hash
+- generate_token
+
+
+## USER
+### Admin
+### Model
+### Views
+
+## FAVORITE
+### Admin
+### Model
+### Views
+
+## STORY
+### Admin
+### Model
+### Views
+
 
 # Learnings From Cupcakes
 - Schemas can have a class Config with attr exclude to allow or deny additional

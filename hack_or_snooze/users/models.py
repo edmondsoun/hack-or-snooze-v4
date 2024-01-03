@@ -5,6 +5,11 @@ from django.core.validators import RegexValidator
 
 from ninja.errors import AuthenticationError
 
+from stories.models import Story
+
+# TODO: Nice to have: remove email from the model since we will not
+# be using it
+
 
 class User(AbstractUser):
     """User model. Currently draws from AbstractUser with no additional
@@ -18,6 +23,9 @@ class User(AbstractUser):
         max_length=150,
     )
 
+    # TODO: change readout in admin to have story title vs. uuid
+    favorites = models.ManyToManyField(Story)
+
     @classmethod
     def signup(cls, user_data):
         """Sign up a new user with provided credentials.
@@ -26,6 +34,8 @@ class User(AbstractUser):
 
         user = cls.objects.create(
             username=user_data.username,
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
         )
 
         user.set_password(raw_password=user_data.password)
@@ -47,23 +57,22 @@ class User(AbstractUser):
             raise AuthenticationError("Unauthorized")
 
 
+# class Favorite(models.Model):
+#     """Favorite model.
 
-class Favorite(models.Model):
-    """Favorite model.
+#     A favorite is a many-to-many relationship between users and stories.
+#     """
 
-    A favorite is a many-to-many relationship between users and stories.
-    """
+#     user = models.ForeignKey(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.RESTRICT,
+#         related_name='favorites',
+#     )
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.RESTRICT,
-        related_name='favorites',
-    )
+#     story = models.ForeignKey(
+#         'stories.Story',
+#         on_delete=models.RESTRICT,
+#     )
 
-    story = models.ForeignKey(
-        'stories.Story',
-        on_delete=models.RESTRICT,
-    )
-
-    class Meta:
-        unique_together = ['user_id', 'story_id']
+#     class Meta:
+#         unique_together = ['user_id', 'story_id']

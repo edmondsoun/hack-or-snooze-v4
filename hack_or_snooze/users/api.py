@@ -13,40 +13,10 @@ from .auth_utils import AUTH_KEY, ApiKey
 
 from stories.api import StorySchema
 
-
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
-
 ALPHANUMERIC_STRING_PATTERN = r'^[0-9a-zA-Z]*$'
 
-
 router = Router()
-
-# FIXME: Nice to do: move this to some sort of core location rather
-# than in the user file
-
-# class ApiKey(APIKeyHeader):
-#     """Class to provide authentication via token in header."""
-
-#     param_name = AUTH_KEY
-
-#     def authenticate(self, request, token):
-#         """
-#         Parse token submission and check validity.
-
-#         Tokens are formatted like:
-#             "<username>:<hash>"
-
-#         On success, returns username.
-
-#         On failure, returns None. Error message JSON is automatically generated:
-#             {"detail": "Unauthorized"}
-#         """
-#         print("in authenticate")
-
-#         if check_token(token):
-#             username = token.split(":")[0]
-#             return username
-
 
 token_header = ApiKey()
 
@@ -55,29 +25,18 @@ token_header = ApiKey()
 
 class UserOut(ModelSchema):
     stories: List[StorySchema]
-    # favorites: List[StorySchema]
+    favorites: List[StorySchema]
 
     class Meta:
         model = User
         # for adding a field, it must literally exist on the model, it can't
         # just be a relationship
-        fields = ['username', 'password',
-                  'first_name', 'last_name', 'date_joined']
-
-
-# FIXME: remove this boilerplate resp schema once real versions are complete
-class UserSchema(ModelSchema):
-    class Meta:
-        model = User
-        fields = ['username']
+        fields = ['username', 'first_name', 'last_name', 'date_joined']
 
 
 class SignupIn(ModelSchema):
     username: constr(pattern=ALPHANUMERIC_STRING_PATTERN)
 
-    # TODO: decide what fields we want to require and populate into DB
-    # TODO: Nice to have: remove email from the model since we will not
-    # be using it
     class Meta:
         model = User
         fields = ['username', 'password', 'first_name', 'last_name']
@@ -111,6 +70,13 @@ class DuplicateUser(Schema):
 
 class Unauthorized(Schema):
     error: str
+
+
+# FIXME: likely will be removed if we don't use GET /users endpoint
+# class UserSchema(ModelSchema):
+#     class Meta:
+#         model = User
+#         fields = ['username']
 
 
 ######## AUTH ##################################################################
@@ -182,15 +148,15 @@ def login(request, data: LoginIn):
 
 
 ######## USERS #################################################################
-# Initial test route:
 
 
-@router.get('/', response=List[UserSchema], summary="PLACEHOLDER", auth=token_header)
-def get_users(request):
-    print("TESTING", request.auth)
+# @router.get('/', response=List[UserSchema], summary="PLACEHOLDER", auth=token_header)
+# def get_users(request):
+#     """"""
+#     print("TESTING", request.auth)
 
-    users = User.objects.all()
-    return users
+#     users = User.objects.all()
+#     return users
 
 
 @router.get('/{str:username}', response=UserOut, summary="PLACEHOLDER", auth=token_header)
@@ -200,8 +166,8 @@ def get_user(request, username: str):
     Authentication: token
     Authorization: same user or admin
     """
-    user = User.objects.get(username=username)
 
+    user = User.objects.get(username=username)
     return user
 
 
