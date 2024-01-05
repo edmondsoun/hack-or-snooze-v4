@@ -66,13 +66,6 @@ class Unauthorized(Schema):
     error: str
 
 
-# FIXME: likely will be removed if we don't use GET /users endpoint
-# class UserSchema(ModelSchema):
-#     class Meta:
-#         model = User
-#         fields = ['username']
-
-
 ######## AUTH ##################################################################
 
 
@@ -152,15 +145,6 @@ def login(request, data: LoginInput):
 ######## USERS #################################################################
 
 
-# @router.get('/', response=List[UserSchema], summary="PLACEHOLDER", auth=token_header)
-# def get_users(request):
-#     """"""
-#     print("TESTING", request.auth)
-
-#     users = User.objects.all()
-#     return users
-
-
 @router.get(
     '/{str:username}',
     response={200: UserOutput, 401: Unauthorized},
@@ -199,7 +183,6 @@ def update_user(request, username: str):
         return 401, {"error": "Unauthorized."}
 
     # TODO:
-
 
 
 ######## FAVORIRTES ############################################################
