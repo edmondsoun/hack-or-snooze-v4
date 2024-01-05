@@ -84,7 +84,9 @@ def check_token(token):
 
     try:
         username, hash = token.split(":")
-    except ValueError:
+    # A malformed username will raise a ValueError
+    # A missing header will raise an AttributeError
+    except (ValueError, AttributeError):
         return False
 
     return generate_hash(username) == hash

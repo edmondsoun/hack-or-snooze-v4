@@ -88,10 +88,9 @@ class BadRequest(Schema):
 
 ######## AUTH ##################################################################
 
-# FIXME: should be 201
 @router.post(
     '/signup',
-    response={200: AuthOutput, 422: DuplicateUser},
+    response={201: AuthOutput, 422: DuplicateUser},
     description="DESC_PLACEHOLDER",
     summary="SUMMARY_PLACEHOLDER"
 )
@@ -133,7 +132,7 @@ def signup(request, data: SignupInput):
 
     token = generate_token(user.username)
 
-    return {
+    return 201, {
         AUTH_KEY: token,
         "user": user
     }
@@ -233,7 +232,17 @@ def get_user(request, username: str):
 def update_user(request, username: str, data: UserPatchInput):
     """Update a single user.
 
-
+    On success, return user info:
+        {
+            "user": {
+                "stories": [Story, Story...],
+                "favorites": [Story, Story...],
+                "username": "test",
+                "first_name": "First",
+                "last_name": "Last",
+                "date_joined": "2000-01-01T00:00:00Z"
+            }
+        }
 
     Authentication: token
     Authorization: same user or admin
@@ -258,10 +267,10 @@ def update_user(request, username: str, data: UserPatchInput):
 
     user.save()
 
-    return user
+    return {"user": user}
 
 
-######## FAVORIRTES ############################################################
+######## FAVORITES ############################################################
 
 @router.post('/{str:username}/favorites/{int:favorite_id}')
 def add_favorite(request, username: str, favorite_id: int):
