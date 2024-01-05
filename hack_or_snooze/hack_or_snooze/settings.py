@@ -127,6 +127,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# FIXME: best practice here for APIs with frequent POSTing?
+# STAFFNOTE: early on we were getting errors from Django about appending a slash
+# to our URLs. Error is not occurring now, but leaving this for reference in
+# case it comes back:
 
 # APPEND_SLASH = False

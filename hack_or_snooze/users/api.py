@@ -9,7 +9,7 @@ from ninja.errors import AuthenticationError
 
 from .models import User
 from .utils import generate_token
-from .auth_utils import AUTH_KEY, ApiKey
+from .auth_utils import AUTH_KEY, token_header
 
 from stories.api import StorySchema
 
@@ -18,7 +18,6 @@ ALPHANUMERIC_STRING_PATTERN = r'^[0-9a-zA-Z]*$'
 
 router = Router()
 
-token_header = ApiKey()
 
 ######## SCHEMA ################################################################
 

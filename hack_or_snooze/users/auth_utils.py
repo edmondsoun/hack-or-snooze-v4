@@ -30,3 +30,6 @@ class ApiKey(APIKeyHeader):
 
             user = User.objects.get(username=username)
             return user
+
+
+token_header = ApiKey()

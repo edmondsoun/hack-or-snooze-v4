@@ -4,11 +4,7 @@ from ninja import Router, Schema, ModelSchema
 from .models import Story
 from users.models import User
 
-from users.auth_utils import ApiKey
-
-# FIXME: maybe figure out a different way of handling this rather than 
-token_header = ApiKey()
-
+from users.auth_utils import token_header
 
 router = Router()
 
