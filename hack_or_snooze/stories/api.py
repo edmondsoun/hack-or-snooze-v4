@@ -41,12 +41,10 @@ def create_story(request, payload: StoryPostIn):
     Authorization: all users
     """
 
-    # TODO: either strip out or pass along the username to instantiate the
-    # appropriate user:
-    user = User.objects.get(username=request.auth)
+    username = request.auth
     story_data = payload.dict()
 
-    story = Story.objects.create(username=user, **story_data)
+    story = Story.objects.create(username=username, **story_data)
     return story
 
 
@@ -61,9 +59,12 @@ def get_stories(request):
     """
 
     stories = Story.objects.all()
+
     return stories
 
-# TODO: is there a UUID type for the id?
+# STAFFNOTE: The type of id on the story object is UUID, you can
+# inspect this in pdb with StorySchema.model_fields, and look at the
+# corresponding fields and their type annotations
 
 
 @router.get('/{str:story_id}')
