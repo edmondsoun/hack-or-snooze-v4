@@ -5,13 +5,16 @@
 - Token now must be sent in the *header*, not the body.
 - `request.auth` stores the return value our ApiKey auth class (currently "username")
 
-# TODO:
-
+# TOP-LEVEL TODO:
 - Seed data for production
 - Set up admin to allow quick post/user deletes
 - Way to handle dumping the DB (solved by Django-Ninja?)
 - Write tests
   - Set up factories for testing
+
+# DOCS TODO:
+- Update PLACEHOLDER in all routes
+- Clean up formatting of docstring insertion
 
 ### Endpoints
 Include (main):

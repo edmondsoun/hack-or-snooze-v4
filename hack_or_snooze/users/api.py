@@ -69,19 +69,26 @@ class Unauthorized(Schema):
 ######## AUTH ##################################################################
 
 
-@router.post('/signup', response={200: AuthOutput, 422: DuplicateUser})
+@router.post(
+    '/signup',
+    response={200: AuthOutput, 422: DuplicateUser},
+    description="DESC_PLACEHOLDER",
+    summary="SUMMARY_PLACEHOLDER"
+)
 def signup(request, data: SignupInput):
     """
     Handle user signup. User must send:
         {
             "username": "test",
-            "password": "password"
-            #FIXME: needs fn/ln
+            "password": "password",
+            "first_name": "First",
+            "last_name": "Last"
         }
 
     On success, return auth token:
         {
-            "token": "test:098f6bcd4621"
+            "token": "test:098f6bcd4621",
+            "user": see UserOut Schema
         }
 
     On failure for repeat username, return error JSON:
@@ -105,7 +112,12 @@ def signup(request, data: SignupInput):
     }
 
 
-@router.post('/login', response={200: AuthOutput, 401: Unauthorized})
+@router.post(
+    '/login',
+    response={200: AuthOutput, 401: Unauthorized},
+    description="DESC_PLACEHOLDER",
+    summary="SUMMARY_PLACEHOLDER"
+)
 def login(request, data: LoginInput):
     """
     Handle user login. User must send:
@@ -127,7 +139,6 @@ def login(request, data: LoginInput):
 
     Authentication: none
     """
-    breakpoint()
 
     try:
         user = User.login(user_data=data)
