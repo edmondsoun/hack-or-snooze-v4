@@ -34,3 +34,6 @@ class Story(TimeStampedModel, models.Model):
     )
 
     url = models.URLField()
+
+    def __str__(self):
+        return self.title

@@ -15,8 +15,8 @@ class User(AbstractUser):
     """User model. Currently draws from AbstractUser with no additional
     columns."""
 
-    # TODO: model should include DB constraints on username pattern to mirror
-    # schema validation?
+    # NICETOHAVE: model should include DB constraints on username pattern to
+    # mirror schema validation?
     username = models.CharField(
         primary_key=True,
         max_length=150,
