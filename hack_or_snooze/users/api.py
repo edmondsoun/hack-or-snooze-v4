@@ -3,13 +3,13 @@ from pydantic import constr
 
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 
 from ninja import ModelSchema, Schema, Router
 from ninja.errors import AuthenticationError
 
 from .models import User
-from .utils import generate_token
-from .auth_utils import AUTH_KEY, token_header
+from .auth_utils import AUTH_KEY, token_header, generate_token
 
 from stories.api import StorySchema
 
@@ -31,6 +31,18 @@ class UserOutput(ModelSchema):
         # for adding a field, it must literally exist on the model, it can't
         # just be a relationship
         fields = ['username', 'first_name', 'last_name', 'date_joined']
+
+
+class UserPatchInput(ModelSchema):
+    # NICETOHAVE: re-enter password for authentication?
+
+    class Meta:
+        model = User
+        fields = ['password', 'first_name', 'last_name']
+        fields_optional = ['password', 'first_name', 'last_name']
+
+    class Config:
+        extra = FORBID_EXTRA_FIELDS_KEYWORD
 
 
 class SignupInput(ModelSchema):
@@ -66,9 +78,13 @@ class Unauthorized(Schema):
     error: str
 
 
+class BadRequest(Schema):
+    error: str
+
+
 ######## AUTH ##################################################################
 
-
+# FIXME: should be 201
 @router.post(
     '/signup',
     response={200: AuthOutput, 422: DuplicateUser},
@@ -178,11 +194,11 @@ def get_user(request, username: str):
 
 @router.patch(
     '/{str:username}',
-    response={200: UserOutput, 401: Unauthorized},
+    response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
     summary="PLACEHOLDER",
     auth=token_header
 )
-def update_user(request, username: str):
+def update_user(request, username: str, data: UserPatchInput):
     """Update a single user.
 
     Authentication: token
@@ -192,6 +208,22 @@ def update_user(request, username: str):
 
     if username != curr_user.username and curr_user.is_staff is not True:
         return 401, {"error": "Unauthorized."}
+
+    breakpoint()
+    # if user sent empty request body, provide helpful feedback:
+    if not data:
+        return 400, {"error": "No data provided to patch."}
+
+    user = get_object_or_404(User, username=curr_user)
+
+    # exclude_unset prevents assignment of attributes that were not passed
+    # in the payload
+    for attr, value in data.dict(exclude_unset=True).items():
+        setattr(user, attr, value)
+
+    user.save()
+
+    return user
 
     # TODO:
 
