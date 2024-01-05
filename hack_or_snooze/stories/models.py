@@ -11,7 +11,9 @@ class Story(TimeStampedModel, models.Model):
 
     class Meta:
         verbose_name_plural = 'Stories'
-
+    #STAFFNOTE: Ask Joel, if we should enforce this, at the cost of
+    # potentially more cryptic errors, or just use a str and manually
+    # generate a UUID
     id = models.UUIDField(
         default=uuid.uuid4,
         primary_key=True,
