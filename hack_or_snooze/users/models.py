@@ -7,7 +7,7 @@ from ninja.errors import AuthenticationError
 
 from stories.models import Story
 
-# TODO: Nice to have: remove email from the model since we will not
+# NICETOHAVE: remove email from the model since we will not
 # be using it
 
 

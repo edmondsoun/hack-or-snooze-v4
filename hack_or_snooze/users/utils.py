@@ -28,9 +28,10 @@ def generate_hash(username):
     encoded_username = username.encode()
     h = md5()
     h.update(encoded_username)
-    # TODO: check if we can limit digest without manually truncating?
     hashed_username = h.hexdigest()
 
+    # STAFFNOTE: We are reducing the size of the hash for readability for the
+    # students. PLEASE NEVER REALLY DO THIS
     truncated_hash = hashed_username[0:12]
     print("truncated hash:", truncated_hash)
 
