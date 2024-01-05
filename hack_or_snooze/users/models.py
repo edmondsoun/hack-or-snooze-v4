@@ -17,10 +17,21 @@ class User(AbstractUser):
 
     # TODO: model should include DB constraints on username pattern to mirror
     # schema validation?
-
     username = models.CharField(
         primary_key=True,
         max_length=150,
+    )
+
+    # Need to set blank=False, otherwise the ModelSchema from DjangoNinja will
+    # interpret these fields as optional:
+    first_name = models.CharField(
+        max_length=150,
+        blank=False,
+    )
+
+    last_name = models.CharField(
+        max_length=150,
+        blank=False,
     )
 
     # TODO: change readout in admin to have story title vs. uuid

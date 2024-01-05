@@ -84,6 +84,7 @@ def signup(request, data: SignupInput):
         {
             "username": "test",
             "password": "password"
+            #FIXME: needs fn/ln
         }
 
     On success, return auth token:
@@ -134,6 +135,7 @@ def login(request, data: LoginInput):
 
     Authentication: none
     """
+    breakpoint()
 
     try:
         user = User.login(user_data=data)
