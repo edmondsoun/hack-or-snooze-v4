@@ -34,7 +34,6 @@ class User(AbstractUser):
         blank=False,
     )
 
-    # TODO: change readout in admin to have story title vs. uuid
     favorites = models.ManyToManyField(Story)
 
     @classmethod
