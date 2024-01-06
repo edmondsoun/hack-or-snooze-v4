@@ -1,92 +1,28 @@
-from typing import List
-from pydantic import constr
-
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 
-from ninja import ModelSchema, Schema, Router
+from ninja import Router
 from ninja.errors import AuthenticationError
+
+from .schemas import (UserGetOutput,
+                      UserPatchInput,
+                      SignupInput,
+                      LoginInput,
+                      AuthOutput,
+                      DuplicateUser)
+from hack_or_snooze.error_schemas import (Unauthorized, BadRequest)
+
 
 from .models import User
 from .auth_utils import AUTH_KEY, token_header, generate_token
 
-from stories.api import StorySchema
-
-FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
-ALPHANUMERIC_STRING_PATTERN = r'^[0-9a-zA-Z]*$'
 
 router = Router()
 
 
-######## SCHEMA ################################################################
-
-
-class UserSchema(ModelSchema):
-    stories: List[StorySchema]
-    favorites: List[StorySchema]
-
-    class Meta:
-        model = User
-        # for adding a field, it must literally exist on the model, it can't
-        # just be a relationship
-        fields = ['username', 'first_name', 'last_name', 'date_joined']
-
-
-class UserGetOutput(Schema):
-    user: UserSchema
-
-
-class UserPatchInput(ModelSchema):
-    # NICETOHAVE: re-enter password for authentication?
-
-    class Meta:
-        model = User
-        fields = ['password', 'first_name', 'last_name']
-        fields_optional = ['password', 'first_name', 'last_name']
-
-    class Config:
-        extra = FORBID_EXTRA_FIELDS_KEYWORD
-
-
-class SignupInput(ModelSchema):
-    username: constr(pattern=ALPHANUMERIC_STRING_PATTERN)
-
-    class Meta:
-        model = User
-        fields = ['username', 'password', 'first_name', 'last_name']
-
-    class Config:
-        extra = FORBID_EXTRA_FIELDS_KEYWORD
-
-
-class LoginInput(ModelSchema):
-    class Meta:
-        model = User
-        fields = ['username', 'password']
-
-    class Config:
-        extra = FORBID_EXTRA_FIELDS_KEYWORD
-
-
-class AuthOutput(Schema):
-    token: str
-    user: UserSchema
-
-
-class DuplicateUser(Schema):
-    error: str
-
-
-class Unauthorized(Schema):
-    error: str
-
-
-class BadRequest(Schema):
-    error: str
-
-
 ######## AUTH ##################################################################
+
 
 @router.post(
     '/signup',

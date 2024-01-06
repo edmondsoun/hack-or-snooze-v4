@@ -1,73 +1,25 @@
-from typing import List
 from pydantic import UUID4
 
 from django.shortcuts import get_object_or_404
 
-from ninja import Router, Schema, ModelSchema
+from ninja import Router
+
+from .schemas import (StoryPostInput,
+                      StoryPostOutput,
+                      StoryGetAllOutput,
+                      StoryGetOutput,
+                      StoryDeleteOutput
+                      )
+from hack_or_snooze.error_schemas import Unauthorized
 
 from .models import Story
-# from users.api import Unauthorized
-# from users.models import User
 
 from users.auth_utils import token_header
 
 # TODO: Find a more general config area for this, so we dont dupe
-FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
 
 
 router = Router()
-
-
-class StorySchema(ModelSchema):
-    class Meta:
-        model = Story
-        # NOTE: current frontend expects 'id' as 'storyId' in response JSON:
-        fields = ['id', 'username', 'title',
-                  'author', 'url', 'created', 'modified']
-
-
-class StoryGetOutput(Schema):
-    """Schema for GET /stories/{id} response body"""
-
-    story: StorySchema
-
-
-class StoryPostOutput(Schema):
-    """Schema for GET /stories/{id} response body"""
-
-    story: StorySchema
-
-
-class StoryGetAllOutput(Schema):
-    """Schema for GET /stories response body"""
-
-    stories: List[StorySchema]
-
-
-class StoryDeleteOutput(ModelSchema):
-    """Schema for DELETE /stories/{id} response body"""
-    deleted: bool
-
-    class Meta:
-        model = Story
-        fields = ["id"]
-
-    class Config:
-        extra = FORBID_EXTRA_FIELDS_KEYWORD
-
-
-class StoryPostInput(ModelSchema):
-    """Schema for POST /stories request body"""
-    class Meta:
-        model = Story
-        fields = ["author", "title", "url"]
-
-    class Config:
-        extra = FORBID_EXTRA_FIELDS_KEYWORD
-
-
-class Unauthorized(Schema):
-    error: str
 
 
 @router.post(
@@ -96,10 +48,10 @@ def create_story(request, data: StoryPostInput):
     Authorization: all users
     """
 
-    username = request.auth
+    user = request.auth
     story_data = data.dict()
 
-    story = Story.objects.create(username=username, **story_data)
+    story = Story.objects.create(user=user, **story_data)
 
     return {"story": story}
 
@@ -137,7 +89,8 @@ def get_stories(request):
 
 # 3 possible errors:
 # 1: You did not give me a UUID
-# 2: You gave me something that appears to be a UUID but it's not formatted correctly
+# 2: You gave me something that appears to be a UUID but it's not formatted
+#    correctly
 # 3: You gave me a proper UUID, but there is no such id in the DB
 
 @router.get(
@@ -191,6 +144,8 @@ def delete_story(request, story_id: UUID4):
 
     story = get_object_or_404(Story, id=story_id)
 
+    breakpoint()
+
     if story.username != curr_user.username and curr_user.is_staff is not True:
         return 401, {"error": "Unauthorized."}
 
@@ -202,5 +157,5 @@ def delete_story(request, story_id: UUID4):
     }
 
 
-# STAFFNOTE: Further study includes prompt to allow users to edit stories. Do we
-# actually want this?
+# STAFFNOTE: Further study includes prompt to allow users to edit stories. Do
+# we actually want this?

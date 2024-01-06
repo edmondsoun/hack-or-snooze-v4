@@ -34,7 +34,10 @@ class User(AbstractUser):
         blank=False,
     )
 
-    favorites = models.ManyToManyField(Story)
+    # FIXME:Right now, this field is acting as a "Query that has not been fired off"
+    # Essentially it is not a proper walkable ORM field
+    # Research this for next time
+    favorites = models.ManyToManyField(Story, related_name="favorited_by")
 
     @classmethod
     def signup(cls, user_data):
