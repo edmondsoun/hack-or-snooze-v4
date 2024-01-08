@@ -5,6 +5,7 @@
 - Token now must be sent in the *header*, not the body.
 - `request.auth` stores the return value our ApiKey auth class (currently "username")
 
+<<<<<<< Updated upstream
 # TOP-LEVEL TODO:
 - Seed data for production ❌
 - Set up admin to allow quick post/user deletes ✅ (done with django admin)
@@ -20,6 +21,10 @@
 
 # CURRENT STATUS
 ### ENDPOINTS
+=======
+### Endpoints
+Include (main):
+>>>>>>> Stashed changes
 - Login ✅
 - Signup ✅
 - User (get/patch/) ✅
@@ -67,11 +72,10 @@ Exclude:
   - login failure (non-existant username)
   - login failure (username exists; wrong password)
 
-### Utils (unit testing)
+### auth_utils (unit testing)
 - check_token
 - generate_hash
 - generate_token
-
 
 ## USER
 ### Admin
@@ -88,8 +92,19 @@ Exclude:
 ### Model
 ### Views
 
+# TOP-LEVEL TODO:
+- Seed data for production
+- Set up admin to allow quick post/user deletes
+- Way to handle dumping the DB (solved by Django-Ninja?)
+- Write tests
+  - Set up factories for testing
 
-# Learnings From Cupcakes
+# DOCS TODO:
+- Update PLACEHOLDER in all routes
+- Clean up formatting of docstring insertion
+
+
+<!-- # Learnings From Cupcakes
 - Schemas can have a class Config with attr exclude to allow or deny additional
   arguments in the payload
 - setting response in the api decorator will type the response for Open API
@@ -101,4 +116,4 @@ Exclude:
   optional fields (for something like a patch request). However, the caveat is
   that we need to iterate over that payload using `exclude_unset=True`. Without
   this, we will get database errors when it tries to set Null values from that
-  default None established in the Schema
+  default None established in the Schema -->
