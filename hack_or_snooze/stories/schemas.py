@@ -15,7 +15,8 @@ class StorySchema(ModelSchema):
 
     class Meta:
         model = Story
-        # NOTE: current frontend expects 'id' as 'storyId' in response JSON:
+        # FIXME: current frontend expects 'id' as 'storyId' in response JSON
+        # (this will need a fix on the *frontend*):
         fields = ['id', 'title',
                   'author', 'url', 'created', 'modified']
 

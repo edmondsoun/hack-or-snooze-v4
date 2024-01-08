@@ -6,31 +6,48 @@
 - `request.auth` stores the return value our ApiKey auth class (currently "username")
 
 # TOP-LEVEL TODO:
-- Seed data for production
-- Set up admin to allow quick post/user deletes
-- Way to handle dumping the DB (solved by Django-Ninja?)
-- Write tests
+- Seed data for production ❌
+- Set up admin to allow quick post/user deletes ✅ (done with django admin)
+- Way to handle reseting the DB (solved by Django-Ninja?) ❌
+- Write tests ❌
   - Set up factories for testing
 
 # DOCS TODO:
 - Update PLACEHOLDER in all routes
 - Clean up formatting of docstring insertion
 
-### Endpoints
-Include (main):
+
+
+# CURRENT STATUS
+### ENDPOINTS
 - Login ✅
 - Signup ✅
-- Favorite (post/delete) ✅
-- Stories (get/post) ✅
+- User (get/patch/) ✅
+- Favorite (post/delete) ❌
+- Stories (get/post/patch/delete) ✅
 - Story (get) ✅
 
-Include (FS):
-- User (get/update)
-- Story (update/delete)
+### DOCUMENTATION
+- docstrings for all endpoints ✅ (except the favorites endpoints)
+- Write Summary and descriptions for Open API Docs ❌
+
+### TESTING
+- Testing of util functions ❌
+- Testing of endpoints ❌
+
+### DEPLOYMENT
+- application deployed
+- created seed data
+
 
 Exclude:
 - Users (all)
 - User (delete) []
+
+### Questions For Clarity
+- How should we implement reseting the db? Should it have the same functionality as it does now, where it resets every hour?
+- Do we want to implement a route to edit/patch user stories? This exists as a piece in the FS for this project currently
+- Should we enforce a UUID at the database level? This could cause more cryptic errors at the point of validation. Should we instead just make this a str field and manually generate a UUID?
 
 # Test Scaffolding
 
