@@ -1,36 +1,22 @@
 # hack-or-snooze-v4
 
-# RUNNING IMPORTANT NOTES!
-
+# IMPORTANT CHANGES FROM PREVIOUS BACKEND!
 - Token now must be sent in the *header*, not the body.
-- `request.auth` stores the return value our ApiKey auth class (currently "username")
+- `request.auth` stores the return value our ApiKey auth class (currently
+  "username")
 
-<<<<<<< Updated upstream
-# TOP-LEVEL TODO:
-- Seed data for production ❌
-- Set up admin to allow quick post/user deletes ✅ (done with django admin)
-- Way to handle reseting the DB (solved by Django-Ninja?) ❌
-- Write tests ❌
-  - Set up factories for testing
-
-# DOCS TODO:
-- Update PLACEHOLDER in all routes
-- Clean up formatting of docstring insertion
-
-
-
-# CURRENT STATUS
-### ENDPOINTS
-=======
 ### Endpoints
-Include (main):
->>>>>>> Stashed changes
+Include:
 - Login ✅
 - Signup ✅
 - User (get/patch/) ✅
 - Favorite (post/delete) ❌
 - Stories (get/post/patch/delete) ✅
 - Story (get) ✅
+
+Exclude:
+- Users (all)
+- User (delete) []
 
 ### DOCUMENTATION
 - docstrings for all endpoints ✅ (except the favorites endpoints)
@@ -45,17 +31,24 @@ Include (main):
 - created seed data
 
 
-Exclude:
-- Users (all)
-- User (delete) []
+# AT CURRENT VELOCITY:
+- Finishing endpoints: 1/2 day
+- Docs: 1/2 day
+- Testing: 2~3 days
+- Deployment: ? (depends on platform and DB configuration considerations)
+
 
 ### Questions For Clarity
-- How should we implement reseting the db? Should it have the same functionality as it does now, where it resets every hour?
-- Do we want to implement a route to edit/patch user stories? This exists as a piece in the FS for this project currently
-- Should we enforce a UUID at the database level? This could cause more cryptic errors at the point of validation. Should we instead just make this a str field and manually generate a UUID?
+- How should we implement reseting the db? Should it have the same functionality
+  as it does now, where it resets every hour?
+- Do we want to implement a route to edit/patch user stories? This exists as a
+  piece in the FS for this project currently
+- Should we enforce a UUID at the database level? This could cause more cryptic
+  errors at the point of validation. Should we instead just make this a str
+  field and manually generate a UUID?
+
 
 # Test Scaffolding
-
 ## AUTH
 ### Views
 - POST /api/users/signup
@@ -78,20 +71,25 @@ Exclude:
 - generate_token
 
 ## USER
+# TODO: Scaffold these tests.
 ### Admin
 ### Model
 ### Views
 
 ## FAVORITE
+# TODO: Scaffold these tests.
 ### Admin
 ### Model
 ### Views
 
 ## STORY
+# TODO: Scaffold these tests.
 ### Admin
 ### Model
 ### Views
 
+
+# INTERNAL RUNNING NOTES:
 # TOP-LEVEL TODO:
 - Seed data for production
 - Set up admin to allow quick post/user deletes
