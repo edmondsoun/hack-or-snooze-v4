@@ -11,11 +11,15 @@ class Story(TimeStampedModel, models.Model):
 
     class Meta:
         verbose_name_plural = 'Stories'
-    #STAFFNOTE: Ask Joel, if we should enforce this, at the cost of
+    # STAFFNOTE: Ask Joel, if we should enforce this, at the cost of
     # potentially more cryptic errors, or just use a str and manually
     # generate a UUID
-    id = models.UUIDField(
-        default=uuid.uuid4,
+    # Test turning this into a char field, otherwise make it a large number
+
+    # The goal here is to ensure that the students *can* encounter a 404 without
+    # a lot of jumping through hoops
+    id = models.CharField(
+        default=str(uuid.uuid4),
         primary_key=True,
     )
 

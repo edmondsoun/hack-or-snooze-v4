@@ -36,16 +36,18 @@ Exclude:
 - Docs: 1/2 day
 - Testing: 2~3 days
 - Deployment: ? (depends on platform and DB configuration considerations)
+ - this won't be super hard with AWS, but probably slap it up at render
 
 
 ### Questions For Clarity
 - How should we implement reseting the db? Should it have the same functionality
   as it does now, where it resets every hour?
-- Do we want to implement a route to edit/patch user stories? This exists as a
-  piece in the FS for this project currently
+  - no strong opinion on automatically resetting this
 - Should we enforce a UUID at the database level? This could cause more cryptic
   errors at the point of validation. Should we instead just make this a str
-  field and manually generate a UUID?
+  field and manually generate a UUID?✅
+  - changed model field to CharField and set default to a stringified version of
+    a UUID
 
 
 # Test Scaffolding

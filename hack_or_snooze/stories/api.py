@@ -1,5 +1,3 @@
-from pydantic import UUID4
-
 from django.shortcuts import get_object_or_404
 
 from ninja import Router
@@ -97,7 +95,7 @@ def get_stories(request):
     '/{story_id}',
     response=StoryGetOutput
 )
-def get_story(request, story_id: UUID4):
+def get_story(request, story_id: str):
     """Get story by ID.
 
     Returns story data:
@@ -127,7 +125,7 @@ def get_story(request, story_id: UUID4):
     response={200: StoryDeleteOutput, 401: Unauthorized},
     auth=token_header,
 )
-def delete_story(request, story_id: UUID4):
+def delete_story(request, story_id: str):
     """Delete story by ID.
 
     Returns confirmation with ID of deleted story:
