@@ -7,6 +7,7 @@ from ninja.errors import AuthenticationError
 
 from .schemas import (UserGetOutput,
                       UserPatchInput,
+                      FavoritePostInput,
                       SignupInput,
                       LoginInput,
                       AuthOutput,
@@ -15,6 +16,7 @@ from hack_or_snooze.error_schemas import (Unauthorized, BadRequest)
 
 
 from .models import User
+from stories.models import Story
 from .auth_utils import AUTH_KEY, token_header, generate_token
 
 
@@ -208,8 +210,13 @@ def update_user(request, username: str, data: UserPatchInput):
 
 ######## FAVORITES ############################################################
 
-@router.post('/{str:username}/favorites/{int:favorite_id}')
-def add_favorite(request, username: str, favorite_id: int):
+@router.post(
+    '/{str:username}/favorites',
+    response={200: UserGetOutput, 400: BadRequest, 401: Unauthorized},
+    summary="PLACEHOLDER",
+    auth=token_header
+)
+def add_favorite(request, username: str, data: FavoritePostInput):
     """Add a story to a user's favorites.
 
     On success, returns confirmation message and story data.
@@ -217,7 +224,22 @@ def add_favorite(request, username: str, favorite_id: int):
     Authentication: token
     Authorization: same user or admin
     """
-    # TODO:
+    curr_user = request.auth
+
+    if username != curr_user.username and curr_user.is_staff is not True:
+        return 401, {"error": "Unauthorized."}
+
+    # this covers the case where the curr_user is staff, but the target user
+    # does not exist
+    user = get_object_or_404(User, username=curr_user)
+
+    story_id = data.story_id
+
+    story = get_object_or_404(Story, id=story_id)
+
+    # How do we append the favorite to the user
+    breakpoint()
+    user.favorties.append(story)
 
 
 @router.delete('/{str:username}/favorites/{int:favorite_id}')
