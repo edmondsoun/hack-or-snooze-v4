@@ -9,6 +9,8 @@ from stories.schemas import StorySchema
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
 ALPHANUMERIC_STRING_PATTERN = r'^[0-9a-zA-Z]*$'
 
+### USERS SCHEMAS###
+
 
 class UserSchema(ModelSchema):
     stories: List[StorySchema]
@@ -35,6 +37,13 @@ class UserPatchInput(ModelSchema):
 
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
+## FAVORITES SCHEMAS###
+
+
+class FavoritePostInput(Schema):
+    story_id: str
+
+### AUTH SCHEMAS###
 
 
 class SignupInput(ModelSchema):
