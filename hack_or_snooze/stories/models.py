@@ -19,7 +19,7 @@ class Story(TimeStampedModel, models.Model):
     # The goal here is to ensure that the students *can* encounter a 404 without
     # a lot of jumping through hoops
     id = models.CharField(
-        default=str(uuid.uuid4),
+        default=str(uuid.uuid4()),
         primary_key=True,
     )
 
