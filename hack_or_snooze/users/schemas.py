@@ -1,5 +1,6 @@
 from typing import List
-from pydantic import constr
+from typing_extensions import Annotated
+from pydantic import StringConstraints
 
 from ninja import ModelSchema, Schema
 
@@ -52,7 +53,12 @@ class FavoriteDeleteInput(Schema):
 
 
 class SignupInput(ModelSchema):
-    username: constr(pattern=ALPHANUMERIC_STRING_PATTERN)
+    # TODO: Change how this is displayed in the docs OR see if we can default to
+    # "Schema" display instead of "Example Value":
+    username: Annotated[
+        str,
+        StringConstraints(pattern=ALPHANUMERIC_STRING_PATTERN)
+    ]
 
     class Meta:
         model = User
