@@ -17,3 +17,14 @@ class SimpleTest(TestCase):
 
     def test_details(self):
         self.assertEqual(self.test_user.username, "test")
+
+    #TEST: SIS: test_model
+    # isInstance
+
+    #TEST: signup
+        # can signup successfully
+        # duplicate username raises IntegrityError
+
+    #TEST: login
+        # can login successfully
+        # incorrect password raises AuthenticationError

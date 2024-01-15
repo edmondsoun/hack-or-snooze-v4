@@ -55,7 +55,12 @@ class User(AbstractUser):
     def login(cls, user_data):
         """Log in an existing user with provided credentials.
 
-        Returns user instance or raises error if credentials are incorrect."""
+        Returns user instance on success
+
+        Raises error caught in view function if credentials are incorrect:
+            - AuthenticationError on check_password fail
+            - ObjectDoesNotExist on non-existant username
+        """
 
         user = cls.objects.get(username=user_data.username)
 
