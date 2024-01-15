@@ -83,6 +83,7 @@ Exclude:
 ### Admin
 ### Model
 ### Views
+  - test this works with both same user and auth user
 
 ## STORY
 # TODO: Scaffold these tests.

@@ -2,6 +2,8 @@ from hashlib import md5
 
 from ninja.security import APIKeyHeader
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from .models import User
 
 AUTH_KEY = "token"
@@ -26,11 +28,18 @@ class ApiKey(APIKeyHeader):
         """
         print("in authenticate")
 
-        if check_token(token):
-            username = token.split(":")[0]
+        if not check_token(token):
+            return None
 
+        username = token.split(":")[0]
+
+        try:
             user = User.objects.get(username=username)
-            return user
+
+        except ObjectDoesNotExist:
+            return None
+
+        return user
 
 
 token_header = ApiKey()

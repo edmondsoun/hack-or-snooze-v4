@@ -160,7 +160,7 @@ def get_user(request, username: str):
 
     return {"user": user}
 
-
+#FIXME: find a better name for username here
 @router.patch(
     '/{str:username}',
     response={200: UserGetOutput, 400: BadRequest, 401: Unauthorized},
@@ -198,7 +198,7 @@ def update_user(request, username: str, data: UserPatchInput):
     if len(patch_data) == 0:
         return 400, {"error": "No data provided to patch."}
 
-    user = get_object_or_404(User, username=curr_user)
+    user = get_object_or_404(User, username=username)
 
     for attr, value in patch_data.items():
         setattr(user, attr, value)
@@ -210,6 +210,7 @@ def update_user(request, username: str, data: UserPatchInput):
 
 ######## FAVORITES ############################################################
 
+#FIXME: find a better name for username
 @router.post(
     '/{str:username}/favorites',
     response={200: UserGetOutput, 400: BadRequest, 401: Unauthorized},
@@ -219,7 +220,7 @@ def update_user(request, username: str, data: UserPatchInput):
 def add_favorite(request, username: str, data: FavoritePostInput):
     """Add a story to a user's favorites.
 
-    On success, returns confirmation message and story data.
+    On success, returns user data with favorite on user.favorites.
 
     Authentication: token
     Authorization: same user or admin
@@ -231,15 +232,23 @@ def add_favorite(request, username: str, data: FavoritePostInput):
 
     # this covers the case where the curr_user is staff, but the target user
     # does not exist
-    user = get_object_or_404(User, username=curr_user)
+    user = get_object_or_404(User, username=username)
 
     story_id = data.story_id
 
     story = get_object_or_404(Story, id=story_id)
 
-    # How do we append the favorite to the user
-    breakpoint()
-    user.favorties.append(story)
+    if story in user.stories.all():
+        return 400, {"error": "Cannot add own user stories to favorites"}
+
+    # user.favorites is a many-to-many relationship. In Django, a many-to-many
+    # field by default is constrained to only allow one instance of a 
+    # relationship between the two objects
+    # calling this again, will NOT duplicate the relationship if it already
+    # exists
+    user.favorites.add(story)
+
+    return {"user": user}
 
 
 @router.delete('/{str:username}/favorites/{int:favorite_id}')
