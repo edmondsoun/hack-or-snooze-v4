@@ -2,7 +2,9 @@ from django.test import TestCase
 # from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
+from users.models import User
 from users.factories import UserFactory
+from users.schemas import SignupInput
 # from stories.factories import StoryFactory
 
 # TODO: remove any unnecessary setup and imports
@@ -54,18 +56,31 @@ class UserModelTest(TestCase):
         with self.assertRaises(ValidationError):
             self.test_user.full_clean()
 
-    # investigate full_clean
-    # TEST: SIS: test_model
-    # isInstance
+    def test_signup_ok(self):
+        """Test User signup method runs successfully and returns a user
+        instance."""
 
-    # TEST: first_name, last_name fields
-        # test that fields are not allowed to be blank
+        new_user_data = SignupInput(
+            username="test2",
+            password="test_password",
+            first_name="first",
+            last_name="last",
+        )
+
+        new_user = User.signup(new_user_data)
+        self.assertIsInstance(new_user, User)
+        print("new_user is:", new_user)
+
+        for field in new_user_data:
+            self.assertEqual(new_user_data[field], new_user[field])
+
+
 
     # TEST: signup
-        # can signup successfully
+        # can signup successfully (returns an instance)
         # duplicate username raises IntegrityError
 
     # TEST: login
-        # can login successfully
+        # can login successfully (returns an instance)
         # incorrect password raises AuthenticationError
         # nonexistent nonexistent username raises ObjectDoesNotExist

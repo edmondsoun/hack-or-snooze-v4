@@ -41,6 +41,10 @@ class User(AbstractUser):
     def signup(cls, user_data):
         """Sign up a new user with provided credentials.
 
+        TODO: clever way to import and use SignupInput as the type in the function signature?
+
+        Takes an instance of the SignupInput schema.
+
         Returns user instance or raises IntegrityError on duplicate username."""
 
         user = cls.objects.create(
@@ -57,6 +61,10 @@ class User(AbstractUser):
     @classmethod
     def login(cls, user_data):
         """Log in an existing user with provided credentials.
+
+        TODO: clever way to import and use SignupInput as the type in the function signature?
+
+        Takes an instance of the LoginInput schema.
 
         Returns user instance on success
 
