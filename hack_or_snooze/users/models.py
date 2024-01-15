@@ -1,7 +1,5 @@
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
 
 from ninja.errors import AuthenticationError
 
@@ -34,9 +32,6 @@ class User(AbstractUser):
         blank=False,
     )
 
-    # FIXME:Right now, this field is acting as a "Query that has not been fired off"
-    # Essentially it is not a proper walkable ORM field
-    # Research this for next time
     favorites = models.ManyToManyField(Story, related_name="favorited_by")
 
     @classmethod
@@ -68,24 +63,3 @@ class User(AbstractUser):
             return user
         else:
             raise AuthenticationError("Unauthorized")
-
-
-# class Favorite(models.Model):
-#     """Favorite model.
-
-#     A favorite is a many-to-many relationship between users and stories.
-#     """
-
-#     user = models.ForeignKey(
-#         settings.AUTH_USER_MODEL,
-#         on_delete=models.RESTRICT,
-#         related_name='favorites',
-#     )
-
-#     story = models.ForeignKey(
-#         'stories.Story',
-#         on_delete=models.RESTRICT,
-#     )
-
-#     class Meta:
-#         unique_together = ['user_id', 'story_id']

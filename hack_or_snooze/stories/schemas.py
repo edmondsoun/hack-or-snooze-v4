@@ -10,7 +10,7 @@ FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
 class StorySchema(ModelSchema):
     """Story Schema"""
 
-    # TODO: PYDANTIC MAGIC
+    # NOTE: PYDANTIC MAGIC
     username: str = Field(..., alias="user.username")
 
     class Meta:

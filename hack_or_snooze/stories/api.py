@@ -14,8 +14,6 @@ from .models import Story
 
 from users.auth_utils import token_header
 
-# TODO: Find a more general config area for this, so we dont dupe
-
 
 router = Router()
 
@@ -142,9 +140,7 @@ def delete_story(request, story_id: str):
 
     story = get_object_or_404(Story, id=story_id)
 
-    breakpoint()
-
-    if story.username != curr_user.username and curr_user.is_staff is not True:
+    if story.user.username != curr_user.username and curr_user.is_staff is not True:
         return 401, {"error": "Unauthorized."}
 
     story.delete()

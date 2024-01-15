@@ -23,9 +23,6 @@ class Story(TimeStampedModel, models.Model):
         primary_key=True,
     )
 
-    # related_name gives us ability to do things like: User.stories.all()
-    # TODO: Is this relationship bothersome? Right now we use it to both traverse
-    # our models in an ORM relationship, but also as a derived value for our schemas
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.RESTRICT,
@@ -42,10 +39,6 @@ class Story(TimeStampedModel, models.Model):
     )
 
     url = models.URLField()
-
-    @property
-    def username(self):
-        return f"{self.user.username}"
 
     def __str__(self):
         return self.title
