@@ -28,3 +28,4 @@ class SimpleTest(TestCase):
     #TEST: login
         # can login successfully
         # incorrect password raises AuthenticationError
+        # nonexistent username raises ObjectDoesNotExist
