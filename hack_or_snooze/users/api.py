@@ -5,9 +5,10 @@ from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja.errors import AuthenticationError
 
-from .schemas import (UserGetOutput,
+from .schemas import (UserOutput,
                       UserPatchInput,
                       FavoritePostInput,
+                      FavoriteDeleteInput,
                       SignupInput,
                       LoginInput,
                       AuthOutput,
@@ -129,7 +130,7 @@ def login(request, data: LoginInput):
 
 @router.get(
     '/{str:username}',
-    response={200: UserGetOutput, 401: Unauthorized},
+    response={200: UserOutput, 401: Unauthorized},
     summary="PLACEHOLDER",
     auth=token_header
 )
@@ -156,14 +157,14 @@ def get_user(request, username: str):
     if username != curr_user.username and curr_user.is_staff is not True:
         return 401, {"error": "Unauthorized."}
 
-    user = User.objects.get(username=username)
+    user = get_object_or_404(User, username=username)
 
     return {"user": user}
 
 #FIXME: find a better name for username here
 @router.patch(
     '/{str:username}',
-    response={200: UserGetOutput, 400: BadRequest, 401: Unauthorized},
+    response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
     summary="PLACEHOLDER",
     auth=token_header
 )
@@ -213,7 +214,7 @@ def update_user(request, username: str, data: UserPatchInput):
 #FIXME: find a better name for username
 @router.post(
     '/{str:username}/favorites',
-    response={200: UserGetOutput, 400: BadRequest, 401: Unauthorized},
+    response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
     summary="PLACEHOLDER",
     auth=token_header
 )
@@ -242,7 +243,7 @@ def add_favorite(request, username: str, data: FavoritePostInput):
         return 400, {"error": "Cannot add own user stories to favorites"}
 
     # user.favorites is a many-to-many relationship. In Django, a many-to-many
-    # field by default is constrained to only allow one instance of a 
+    # field by default is constrained to only allow one instance of a
     # relationship between the two objects
     # calling this again, will NOT duplicate the relationship if it already
     # exists
@@ -251,13 +252,33 @@ def add_favorite(request, username: str, data: FavoritePostInput):
     return {"user": user}
 
 
-@router.delete('/{str:username}/favorites/{int:favorite_id}')
-def delete_favorite(request, username: str, favorite_id: int):
+@router.delete(
+    '/{str:username}/favorites',
+    response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
+    summary="PLACEHOLDER",
+    auth=token_header
+)
+def delete_favorite(request, username: str, data: FavoriteDeleteInput):
     """Delete a story from a user's favorites.
 
-    On success, returns confirmation message and story data.
+    On success, returns user data.
 
     Authentication: token
     Authorization: same user or admin
     """
-    # TODO:
+    curr_user = request.auth
+
+    if username != curr_user.username and curr_user.is_staff is not True:
+        return 401, {"error": "Unauthorized."}
+
+    # this covers the case where the curr_user is staff, but the target user
+    # does not exist
+    user = get_object_or_404(User, username=username)
+
+    story_id = data.story_id
+
+    story = get_object_or_404(Story, id=story_id)
+
+    user.favorites.remove(story)
+
+    return {"user": user}

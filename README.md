@@ -10,7 +10,7 @@ Include:
 - Login ✅
 - Signup ✅
 - User (get/patch/) ✅
-- Favorite (post/delete) ❌
+- Favorite (post/delete) ✅
 - Stories (get/post/patch/delete) ✅
 - Story (get) ✅
 

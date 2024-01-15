@@ -23,7 +23,7 @@ class UserSchema(ModelSchema):
         fields = ['username', 'first_name', 'last_name', 'date_joined']
 
 
-class UserGetOutput(Schema):
+class UserOutput(Schema):
     user: UserSchema
 
 
@@ -42,6 +42,11 @@ class UserPatchInput(ModelSchema):
 
 class FavoritePostInput(Schema):
     story_id: str
+
+
+class FavoriteDeleteInput(Schema):
+    story_id: str
+
 
 ### AUTH SCHEMAS###
 
