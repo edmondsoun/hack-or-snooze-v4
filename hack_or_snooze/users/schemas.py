@@ -1,6 +1,6 @@
 from typing import List
 from typing_extensions import Annotated
-from pydantic import StringConstraints
+from pydantic import validator, StringConstraints
 
 from ninja import ModelSchema, Schema
 
@@ -38,8 +38,32 @@ class UserPatchInput(ModelSchema):
 
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
-## FAVORITES SCHEMAS###
 
+    # We need check_fields=False to allow these because we are inhereting
+    # these fields from a parent model:
+    @validator('first_name', pre=True, check_fields=False)
+    def check_first_name(cls, value):
+        """If first_name is sent as an empty string, set it to None."""
+        if value == "":
+            return None
+        return value
+
+    @validator('last_name', pre=True, check_fields=False)
+    def check_last_name(cls, value):
+        """If last_name is sent as an empty string, set it to None."""
+        if value == "":
+            return None
+        return value
+
+    @validator('password', pre=True, check_fields=False)
+    def check_password(cls, value):
+        """If password is sent as an empty string, set it to None."""
+        if value == "":
+            return None
+        return value
+
+
+## FAVORITES SCHEMAS###
 
 class FavoritePostInput(Schema):
     story_id: str
