@@ -4,7 +4,7 @@ from django.test import TestCase
 from stories.factories import StoryFactory
 
 
-class StoryModelTest(TestCase):
+class StoryModelTestCase(TestCase):
     def setUp(self):
         self.test_story = StoryFactory()
 
