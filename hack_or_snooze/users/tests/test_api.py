@@ -12,7 +12,7 @@ from users.factories import UserFactory, FACTORY_USER_PASSWORD
 # from users.schemas import SignupInput, LoginInput
 
 
-class UserAPIAuthTest(TestCase):
+class APIAuthTestCase(TestCase):
     def setUp(self):
         # TODO: investigate why this is outside setup in SIS?
         self.existing_user = UserFactory()
@@ -181,6 +181,8 @@ class UserAPIAuthTest(TestCase):
             content_type="application/json"
         )
 
+        # TODO: can we set a timestamp on the user factory class so we don't
+        # have to dynamically access here?
         response_json = json.loads(response.content)
         response_date_joined = response_json["user"]["date_joined"]
 
@@ -299,27 +301,37 @@ class UserAPIAuthTest(TestCase):
             }
         )
 
-# TODO:
-# AUTH ROUTES
-# - POST /api/users/signup
-#   - signup success✅
-#   - signup failure (missing required data) 422 - from ninja✅
-#       - obj.detail[0].msg
-#   - signup failure (extra fields included) 422 - from ninja✅
-#   - signup failure (username already exists) 422✅
-#       - obj.error
-#   - signup failure (malformed username) 422 - from ninja✅
-#   - (IE, a username including special characters
-#       in particular ':')
-
-# - POST /api/users/login
-#   - login success
-#   - login failure (missing required data) 422 - from ninja
-#       - obj.detail[0].msg
-#   - login failure (extra fields included) 422 - from ninja
-#   - login failure (non-existant username) 401
-#       - obj.error
-#   - login failure (username exists; wrong password) 401
-#       - obj.error
 # USERS ROUTES
+
+class APIUserTestCase(TestCase):
+    # GET /{username}
+    # works ok w/ user token
+    # works ok w/ staff token
+    # 401 unauthorized if no token (authentication)
+    # 401 unauthorized if malformed token (authentication)
+    # 401 unauthorized if different non-staff user's token (authorization)
+    # 404 if user not found w/ staff token
+
+    # PATCH /{username}
+    # works ok w/ user token
+    # works ok w/ staff token
+    # 401 unauthorized if no token (authentication)
+    # 401 unauthorized if malformed token (authentication)
+    # 401 unauthorized if different non-staff user's token (authorization)
+    # 404 if user not found w/ staff token
+
+    # patch specific tests:
+    # works with all fields submitted
+    # works with only some fields submitted
+    # 400 friendly error if no fields submitted
+    # 422 if extra fields submitted
+
+
+
+
+class APIFavoriteTestCase(TestCase):
+    # POST /{username}/favorites
+    # DELETE /{username}/favorites
+
+
 # FAVORITES ROUTES

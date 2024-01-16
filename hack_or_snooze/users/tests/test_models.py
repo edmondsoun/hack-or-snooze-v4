@@ -9,7 +9,7 @@ from users.factories import UserFactory
 from users.schemas import SignupInput, LoginInput
 
 
-class UserModelTest(TestCase):
+class UserModelTestCase(TestCase):
     def setUp(self):
         self.test_user = UserFactory()
 
