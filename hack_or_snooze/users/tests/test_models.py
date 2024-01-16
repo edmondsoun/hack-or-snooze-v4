@@ -1,10 +1,10 @@
 from django.test import TestCase
-# from django.db.utils import IntegrityError
+from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
 from users.models import User
 from users.factories import UserFactory
-from users.schemas import SignupInput
+from users.schemas import SignupInput, LoginInput
 # from stories.factories import StoryFactory
 
 # TODO: remove any unnecessary setup and imports
@@ -13,6 +13,17 @@ from users.schemas import SignupInput
 class UserModelTest(TestCase):
     def setUp(self):
         self.test_user = UserFactory()
+        # self.test_user.save()
+        self.new_user_data = SignupInput(
+            username="test2",
+            password="test_password",
+            first_name="first",
+            last_name="last",
+        )
+        self.login_data = LoginInput(
+            username=self.test_user.username,
+            password="password",
+        )
         # self.edmond_user = UserFactory(username="edmond")
 
         # self.test_story = StoryFactory()
@@ -57,30 +68,45 @@ class UserModelTest(TestCase):
             self.test_user.full_clean()
 
     def test_signup_ok(self):
-        """Test User signup method runs successfully and returns a user
+        """Test User signup method runs successfully and returns a User
         instance."""
 
-        new_user_data = SignupInput(
-            username="test2",
-            password="test_password",
-            first_name="first",
-            last_name="last",
-        )
-
-        new_user = User.signup(new_user_data)
+        new_user = User.signup(self.new_user_data)
         self.assertIsInstance(new_user, User)
-        print("new_user is:", new_user)
 
-        for field in new_user_data:
-            self.assertEqual(new_user_data[field], new_user[field])
+        # change the password field since the user one will have the hashed
+        # password
+        # TODO: Check out __dict__ before we solidify this test as done
+        self.new_user_data.password = new_user.password
+        new_data_dict = dict(self.new_user_data)
+        # new_user_dict = new_user.__dict__
 
+        for field in new_data_dict:
+            self.assertEqual(new_data_dict[field], new_user[field])
 
+    def test_signup_duplicate_username(self):
+        """Test User signup method throws Integrity error when adding duplicate
+        username"""
+
+        with self.assertRaises(IntegrityError):
+            User.signup(**self.new_user_data, username=self.test_user)
+
+    def test_login_ok(self):
+        """Test User login method runs successfuly and returns a User instance
+        """
+        logged_in_user = User.login(self.login_data)
+
+        self.assertIsInstance(logged_in_user, User)
+        self.assertEqual(self.test_user.username, logged_in_user.username)
+
+    def test_login_raises_authentication_error(self):
+        pass
 
     # TEST: signup
-        # can signup successfully (returns an instance)
-        # duplicate username raises IntegrityError
+        # can signup successfully (returns an instance)✅
+        # duplicate username raises IntegrityError✅
 
     # TEST: login
-        # can login successfully (returns an instance)
+        # can login successfully (returns an instance)✅
         # incorrect password raises AuthenticationError
         # nonexistent nonexistent username raises ObjectDoesNotExist
