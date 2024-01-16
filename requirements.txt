@@ -1,5 +1,6 @@
 annotated-types==0.6.0
 asgiref==3.7.2
+coverage==7.4.0
 Django==5.0
 django-model-utils==4.3.1
 django-ninja==1.0.1
