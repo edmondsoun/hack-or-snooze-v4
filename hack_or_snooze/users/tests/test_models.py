@@ -1,38 +1,17 @@
 from django.test import TestCase
 from django.db.utils import IntegrityError
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+
+from ninja.errors import AuthenticationError
 
 from users.models import User
 from users.factories import UserFactory
 from users.schemas import SignupInput, LoginInput
-# from stories.factories import StoryFactory
-
-# TODO: remove any unnecessary setup and imports
 
 
 class UserModelTest(TestCase):
     def setUp(self):
         self.test_user = UserFactory()
-        # self.test_user.save()
-        self.new_user_data = SignupInput(
-            username="test2",
-            password="test_password",
-            first_name="first",
-            last_name="last",
-        )
-        self.login_data = LoginInput(
-            username=self.test_user.username,
-            password="password",
-        )
-        # self.edmond_user = UserFactory(username="edmond")
-
-        # self.test_story = StoryFactory()
-        # self.edmond_story = StoryFactory(user=self.edmond_user)
-
-        # self.test_user.favorites.add(self.edmond_story)
-
-    # def test_details(self):
-    #     self.assertEqual(self.test_user.username, "test")
 
     def test_validation_error_on_blank_first_name(self):
         """
@@ -71,42 +50,67 @@ class UserModelTest(TestCase):
         """Test User signup method runs successfully and returns a User
         instance."""
 
-        new_user = User.signup(self.new_user_data)
+        new_user_data = SignupInput(
+            username="test2",
+            password="test_password",
+            first_name="first",
+            last_name="last",
+        )
+
+        new_user = User.signup(new_user_data)
         self.assertIsInstance(new_user, User)
 
-        # change the password field since the user one will have the hashed
-        # password
-        # TODO: Check out __dict__ before we solidify this test as done
-        self.new_user_data.password = new_user.password
-        new_data_dict = dict(self.new_user_data)
-        # new_user_dict = new_user.__dict__
+        # check user instance has hashed password:
+        self.assertTrue(new_user.check_password(new_user_data.password))
 
-        for field in new_data_dict:
-            self.assertEqual(new_data_dict[field], new_user[field])
-
-    def test_signup_duplicate_username(self):
+    def test_signup_fails_with_duplicate_username(self):
         """Test User signup method throws Integrity error when adding duplicate
-        username"""
+        username."""
+
+        bad_user_data = SignupInput(
+            username=self.test_user.username,
+            password="test_password",
+            first_name="first",
+            last_name="last",
+        )
 
         with self.assertRaises(IntegrityError):
-            User.signup(**self.new_user_data, username=self.test_user)
+            User.signup(bad_user_data)
 
     def test_login_ok(self):
         """Test User login method runs successfuly and returns a User instance
         """
-        logged_in_user = User.login(self.login_data)
+
+        login_data = LoginInput(
+            username=self.test_user.username,
+            password="password",
+        )
+
+        logged_in_user = User.login(login_data)
 
         self.assertIsInstance(logged_in_user, User)
         self.assertEqual(self.test_user.username, logged_in_user.username)
 
-    def test_login_raises_authentication_error(self):
-        pass
+    def test_login_fails_with_incorrect_password(self):
+        """Test login method raises AuthenticationError on incorrect
+        password."""
 
-    # TEST: signup
-        # can signup successfully (returns an instance)✅
-        # duplicate username raises IntegrityError✅
+        bad_login_data = LoginInput(
+            username=self.test_user.username,
+            password="bad_password",
+        )
 
-    # TEST: login
-        # can login successfully (returns an instance)✅
-        # incorrect password raises AuthenticationError
-        # nonexistent nonexistent username raises ObjectDoesNotExist
+        with self.assertRaises(AuthenticationError):
+            User.login(bad_login_data)
+
+    def test_login_fails_with_nonexistent_username(self):
+        """Test login method raises ObjectDoesNotExist on nonexistent
+        username."""
+
+        bad_login_data = LoginInput(
+            username="nonexistent_user",
+            password="password",
+        )
+
+        with self.assertRaises(ObjectDoesNotExist):
+            User.login(bad_login_data)
