@@ -15,8 +15,8 @@ class UserFactory(factory.django.DjangoModelFactory):
     password = factory.PostGenerationMethodCall(
         'set_password', 'password'
     )
-    first_name = "keys"
-    last_name = "soun"
+    first_name = "test_first"
+    last_name = "test_last"
     # We will need this if we want to generate a user with pre-generated
     # favorites
     # favorites = factory.SubFactory(StoryFactory)
