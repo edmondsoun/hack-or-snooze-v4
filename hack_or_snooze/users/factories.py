@@ -3,6 +3,7 @@ import factory
 
 from factory import LazyAttribute
 
+FACTORY_USER_PASSWORD = "password"
 
 class UserFactory(factory.django.DjangoModelFactory):
     """Factory Class for Users"""
@@ -11,12 +12,13 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = 'users.User'
         django_get_or_create = ('username', )
 
-    username = "test"
+    # need to camel case because "_" is prohibited in usernames by our schema
+    username = "factoryUser"
     password = factory.PostGenerationMethodCall(
-        'set_password', 'password'
+        'set_password', FACTORY_USER_PASSWORD
     )
-    first_name = "test_first"
-    last_name = "test_last"
+    first_name = "factory_first"
+    last_name = "factory_last"
     # We will need this if we want to generate a user with pre-generated
     # favorites
     # favorites = factory.SubFactory(StoryFactory)
