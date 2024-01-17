@@ -1,7 +1,7 @@
-
 import factory
+import datetime
 
-from factory import LazyAttribute
+# from factory import LazyAttribute
 
 FACTORY_USER_DEFAULT_PASSWORD = "password"
 
@@ -19,6 +19,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     )
     first_name = "userFirst"
     last_name = "userLast"
+    date_joined = datetime.datetime(2020,1,1,0,0,0,0, tzinfo=datetime.timezone.utc)
     # We will need this if we want to generate a user with pre-generated
     # favorites
     # favorites = factory.SubFactory(StoryFactory)
