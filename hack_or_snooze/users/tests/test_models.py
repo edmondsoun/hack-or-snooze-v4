@@ -114,3 +114,8 @@ class UserModelTestCase(TestCase):
 
         with self.assertRaises(ObjectDoesNotExist):
             User.login(bad_login_data)
+
+
+# TODO:
+# FIXME:
+# Need tests for new .update method
