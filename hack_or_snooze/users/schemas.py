@@ -1,3 +1,4 @@
+import re
 from typing import List
 from typing_extensions import Annotated
 from pydantic import validator, StringConstraints
@@ -7,8 +8,10 @@ from ninja import ModelSchema, Schema
 from .models import User
 from stories.schemas import StorySchema
 
+from users.exceptions import InvalidUsernameException
+
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
-ALPHANUMERIC_STRING_PATTERN = r'^[0-9a-zA-Z]*$'
+ALPHANUMERIC_STRING_PATTERN = re.compile('^[0-9a-zA-Z]*$')
 
 ### USERS SCHEMAS###
 
@@ -79,10 +82,10 @@ class FavoriteDeleteInput(Schema):
 class SignupInput(ModelSchema):
     # TODO: Change how this is displayed in the docs OR see if we can default to
     # "Schema" display instead of "Example Value":
-    username: Annotated[
-        str,
-        StringConstraints(pattern=ALPHANUMERIC_STRING_PATTERN)
-    ]
+    # username: Annotated[
+    #     str,
+    #     StringConstraints(pattern=ALPHANUMERIC_STRING_PATTERN)
+    # ]
 
     class Meta:
         model = User
@@ -90,6 +93,16 @@ class SignupInput(ModelSchema):
 
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
+
+    @validator('username', pre=True, check_fields=False)
+    def check_username(cls, value):
+        """If username does not conform to ALPHANUMERIC String"""
+        # test that incoming value meets regex constraint
+        if not ALPHANUMERIC_STRING_PATTERN.match(value):
+            raise InvalidUsernameException("testing custom exception validator")
+        return value
+        # if it doesnot throw error
+        # if it does, return value
 
 
 class LoginInput(ModelSchema):

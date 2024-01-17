@@ -347,6 +347,7 @@ class APIUserTestCase(TestCase):
     # OTHER TESTS:
     # works with all fields submitted
     # works with only some fields submitted
+    # 400 friendly error if first name or last name is blank
     # 400 friendly error if no fields submitted
     # error if some/all fields contain blank strings as values
     # 422 if extra fields submitted
