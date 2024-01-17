@@ -323,6 +323,7 @@ class APIUserTestCase(TestCase):
     # patch specific tests:
     # works with all fields submitted
     # works with only some fields submitted
+    # 400 friendly error if first name or last name is blank
     # 400 friendly error if no fields submitted
     # 422 if extra fields submitted
 
