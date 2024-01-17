@@ -1,0 +1,2 @@
+class InvalidUsernameException(Exception):
+    pass
