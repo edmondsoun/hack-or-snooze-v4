@@ -7,7 +7,7 @@ from django.test import TestCase
 
 # from ninja.errors import AuthenticationError
 
-# from users.models import User
+from users.models import User
 from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
 
 # NOTE: do we want to use AUTH_KEY constant or hardcode string "token" in tests?
@@ -143,7 +143,9 @@ class APIAuthTestCase(TestCase):
             }
         )
 
-    def test_signup_fail_malformed_username(self):
+    def test_signup_fail_username_must_be_alphanumeric(self):
+        """Test username only contains alphanumeric characters, otherwise token
+        generation/validation may break."""
 
         invalid_data = {
             **self.valid_signup_data,
@@ -302,18 +304,8 @@ class APIAuthTestCase(TestCase):
         )
 
 
-class APIUserTestCase(TestCase):
-    """Test /users endpoints"""
-
-    # GET /{username}
-    # works ok w/ user token ✅
-    # works ok w/ staff token ✅
-    # 401 unauthorized if no token header (authentication) ✅
-    # 401 unauthorized if token header blank (authentication) ✅
-    # 401 unauthorized if malformed token (authentication) ✅
-    # 401 unauthorized if invalid token (authentication) ✅
-    # 401 unauthorized if different non-staff user's token (authorization) ✅
-    # 404 if user not found w/ staff token ✅
+class APIUserGetTestCase(TestCase):
+    """Test GET /users/{username} endpoint."""
 
     def setUp(self):
         # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
@@ -466,10 +458,135 @@ class APIUserTestCase(TestCase):
             }
         )
 
+
+class APIUserPatchTestCase(TestCase):
+    """Test PATCH /users/{username} endpoint."""
+
+    def setUp(self):
+        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
+        # tokens get regenerated every time:
+        self.user = UserFactory()
+        self.user_2 = UserFactory(username="user2")
+        self.staff_user = UserFactory(username="staffUser", is_staff=True)
+
+        self.user_token = generate_token(self.user.username)
+        self.user2_token = generate_token(self.user_2.username)
+        self.staff_user_token = generate_token(self.staff_user.username)
+
+    def test_patch_user_ok_all_fields_as_self(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "newFirst",
+                    "last_name": "newLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_patch_user_ok_some_fields_as_self(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "first_name": "newFirst",
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "newFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    # TODO: may want to simplify or remove this test once .update is unittested
+    def test_patch_user_can_reauthenticate_with_patched_password(self):
+        """This test is to ensure a patched password is re-hashed and stored
+        correctly, such that a user can re-authenticate with the new
+        password."""
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        # Assert we receive the correct response:
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+        # Confirm we can log back in with new password:
+        login_response = self.client.post(
+            '/api/users/login',
+            data=json.dumps({
+                "username": self.user.username,
+                "password": "new_password"
+            }),
+            content_type="application/json"
+        )
+
+        self.assertEqual(login_response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
     # PATCH /{username}
-    # works ok as self, all fields submitted
-    # works ok as self, only some fields submitted
-    # works ok as self, updating password re-hashes before storing
+    # works ok as self, all fields submitted ✅
+    # works ok as self, only some fields submitted ✅
+    # works ok as self, updating password re-hashes before storing ✅
     # works ok w/ staff token
     # 401 unauthorized if no token (authentication)
     # 401 unauthorized if malformed token (authentication)
@@ -479,31 +596,6 @@ class APIUserTestCase(TestCase):
     # 400 friendly error if no fields submitted
     # error if some/all fields contain blank strings as values
     # 422 if extra fields submitted
-
-    # def test_patch_user_ok_as_self(self):
-
-    #     response = self.client.patch(
-    #         '/api/users/user',
-    #         body={
-    #             ""
-    #             }
-    #         headers={AUTH_KEY: self.user_token}
-    #     )
-
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertJSONEqual(
-    #         response.content,
-    #         {
-    #             "user": {
-    #                 "stories": [],
-    #                 "favorites": [],
-    #                 "username": "user",
-    #                 "first_name": "userFirst",
-    #                 "last_name": "userLast",
-    #                 "date_joined": "2020-01-01T00:00:00Z"
-    #             }
-    #         }
-    #     )
 
 
 class APIFavoriteTestCase(TestCase):
@@ -530,3 +622,16 @@ class APIFavoriteTestCase(TestCase):
     # works ok to DELETE same story_id twice?
     # 404 if {username} not found w/ staff token
     # 404 if story_id not found w/ staff token
+
+
+# DONE:
+
+    # GET /{username}
+    # works ok w/ user token ✅
+    # works ok w/ staff token ✅
+    # 401 unauthorized if no token header (authentication) ✅
+    # 401 unauthorized if token header blank (authentication) ✅
+    # 401 unauthorized if malformed token (authentication) ✅
+    # 401 unauthorized if invalid token (authentication) ✅
+    # 401 unauthorized if different non-staff user's token (authorization) ✅
+    # 404 if user not found w/ staff token ✅
