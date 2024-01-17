@@ -205,6 +205,9 @@ def update_user(request, username: str, data: UserPatchInput):
 
     user = get_object_or_404(User, username=username)
 
+    # FIXME:
+    # FIXME:
+    # FIXME: huge bug, this will set a plaintext password when PATCHed
     for attr, value in patch_data.items():
         setattr(user, attr, value)
 

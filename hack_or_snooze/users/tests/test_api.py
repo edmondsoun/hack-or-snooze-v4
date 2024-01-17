@@ -374,6 +374,21 @@ class APIUserTestCase(TestCase):
             }
         )
 
+    def test_get_user_bad_request_nonexistent_user_as_staff(self):
+
+        response = self.client.get(
+            '/api/users/nonexistent',
+            headers={AUTH_KEY: self.staff_user_token}
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
     def test_get_user_unauthorized_no_token_header(self):
 
         response = self.client.get(
@@ -451,35 +466,44 @@ class APIUserTestCase(TestCase):
             }
         )
 
-    def test_get_user_bad_request_nonexistent_user_as_staff(self):
-
-        response = self.client.get(
-            '/api/users/nonexistent',
-            headers={AUTH_KEY: self.staff_user_token}
-        )
-
-        self.assertEqual(response.status_code, 404)
-        self.assertJSONEqual(
-            response.content,
-            {
-                'detail': 'Not Found'
-            }
-        )
-
     # PATCH /{username}
-    # works ok w/ user token
+    # works ok as self, all fields submitted
+    # works ok as self, only some fields submitted
+    # works ok as self, updating password re-hashes before storing
     # works ok w/ staff token
     # 401 unauthorized if no token (authentication)
     # 401 unauthorized if malformed token (authentication)
     # 401 unauthorized if different non-staff user's token (authorization)
     # 404 if user not found w/ staff token
-    # OTHER TESTS:
-    # works with all fields submitted
-    # works with only some fields submitted
     # 400 friendly error if first name or last name is blank
     # 400 friendly error if no fields submitted
     # error if some/all fields contain blank strings as values
     # 422 if extra fields submitted
+
+    # def test_patch_user_ok_as_self(self):
+
+    #     response = self.client.patch(
+    #         '/api/users/user',
+    #         body={
+    #             ""
+    #             }
+    #         headers={AUTH_KEY: self.user_token}
+    #     )
+
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertJSONEqual(
+    #         response.content,
+    #         {
+    #             "user": {
+    #                 "stories": [],
+    #                 "favorites": [],
+    #                 "username": "user",
+    #                 "first_name": "userFirst",
+    #                 "last_name": "userLast",
+    #                 "date_joined": "2020-01-01T00:00:00Z"
+    #             }
+    #         }
+    #     )
 
 
 class APIFavoriteTestCase(TestCase):
