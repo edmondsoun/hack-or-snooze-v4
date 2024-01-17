@@ -41,7 +41,8 @@ class User(AbstractUser):
     def signup(cls, user_data):
         """Sign up a new user with provided credentials.
 
-        TODO: clever way to import and use SignupInput as the type in the function signature?
+        TODO: clever way to import and use SignupInput as the type in the
+        function signature?
 
         Takes an instance of the SignupInput schema.
 
@@ -62,7 +63,8 @@ class User(AbstractUser):
     def login(cls, user_data):
         """Log in an existing user with provided credentials.
 
-        TODO: clever way to import and use SignupInput as the type in the function signature?
+        TODO: clever way to import and use SignupInput as the type in the
+        function signature?
 
         Takes an instance of the LoginInput schema.
 
@@ -82,6 +84,9 @@ class User(AbstractUser):
 
     def update(self, patch_data):
         """Update user record and return updated user instance."""
+
+        # TODO: need a 2nd set of eyes on this, since it was part of a major
+        # bugfix.
 
         for field, value in patch_data.items():
             if (field == 'password'):
