@@ -79,3 +79,16 @@ class User(AbstractUser):
             return user
         else:
             raise AuthenticationError("Unauthorized")
+
+    def update(self, patch_data):
+        """Update user record and return updated user instance."""
+
+        for field, value in patch_data.items():
+            if (field == 'password'):
+                self.set_password(raw_password=patch_data['password'])
+            else:
+                setattr(self, field, value)
+
+        self.save()
+
+        return self
