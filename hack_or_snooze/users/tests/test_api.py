@@ -8,7 +8,7 @@ from django.test import TestCase
 # from ninja.errors import AuthenticationError
 
 # from users.models import User
-from users.factories import UserFactory, FACTORY_USER_PASSWORD
+from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
 # from users.schemas import SignupInput, LoginInput
 
 
@@ -20,13 +20,13 @@ class APIAuthTestCase(TestCase):
         self.valid_signup_data = {
             "username": "test",
             "password": "password",
-            "first_name": "first",
-            "last_name": "last"
+            "first_name": "testFirst",
+            "last_name": "testLast"
         }
 
         self.valid_login_data = {
             "username": self.existing_user.username,
-            "password": FACTORY_USER_PASSWORD
+            "password": FACTORY_USER_DEFAULT_PASSWORD
         }
 
     def test_signup_ok(self):
@@ -50,8 +50,8 @@ class APIAuthTestCase(TestCase):
                     "stories": [],
                     "favorites": [],
                     "username": "test",
-                    "first_name": "first",
-                    "last_name": "last",
+                    "first_name": "testFirst",
+                    "last_name": "testLast",
                     "date_joined": response_date_joined
                 }
             }
@@ -62,7 +62,7 @@ class APIAuthTestCase(TestCase):
         invalid_data = {
             "username": "test",
             "password": "password",
-            "first_name": "first",
+            "first_name": "testFirst",
         }
 
         response = self.client.post(
@@ -92,7 +92,7 @@ class APIAuthTestCase(TestCase):
     def test_signup_fail_extra_fields(self):
         invalid_data = {
             **self.valid_signup_data,
-            "extra": "extra"
+            "extra_field": "extra_value"
         }
 
         response = self.client.post(
@@ -111,7 +111,7 @@ class APIAuthTestCase(TestCase):
                         "loc": [
                             "body",
                             "data",
-                            "extra"
+                            "extra_field"
                         ],
                         "msg": "Extra inputs are not permitted"
                     }
@@ -190,13 +190,13 @@ class APIAuthTestCase(TestCase):
         self.assertEqual(
             response_json,
             {
-                "token": "factoryUser:27bbe49cbca0",
+                "token": "user:ee11cbb19052",
                 "user": {
                     "stories": [],
                     "favorites": [],
-                    "username": "factoryUser",
-                    "first_name": "factory_first",
-                    "last_name": "factory_last",
+                    "username": "user",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
                     "date_joined": response_date_joined
                 }
             }
@@ -234,7 +234,7 @@ class APIAuthTestCase(TestCase):
     def test_login_fail_extra_fields(self):
         invalid_data = {
             **self.valid_login_data,
-            "extra": "extra"
+            "extra_field": "extra_value"
         }
 
         response = self.client.post(
@@ -253,7 +253,7 @@ class APIAuthTestCase(TestCase):
                         "loc": [
                             "body",
                             "data",
-                            "extra"
+                            "extra_field"
                         ],
                         "msg": "Extra inputs are not permitted"
                     }
@@ -303,7 +303,15 @@ class APIAuthTestCase(TestCase):
 
 # USERS ROUTES
 
+
 class APIUserTestCase(TestCase):
+    """Test /users endpoints"""
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.user_2 = UserFactory(username="user2")
+        self.admin = UserFactory(username="admin", is_staff=True)
+
     # GET /{username}
     # works ok w/ user token
     # works ok w/ staff token
@@ -319,19 +327,37 @@ class APIUserTestCase(TestCase):
     # 401 unauthorized if malformed token (authentication)
     # 401 unauthorized if different non-staff user's token (authorization)
     # 404 if user not found w/ staff token
-
-    # patch specific tests:
+    # OTHER TESTS:
     # works with all fields submitted
     # works with only some fields submitted
     # 400 friendly error if no fields submitted
+    # error if some/all fields contain blank strings as values
     # 422 if extra fields submitted
 
 
-
-
 class APIFavoriteTestCase(TestCase):
+    """Test /user/{username}/favorites endpoints"""
     # POST /{username}/favorites
+    # works ok w/ user token
+    # works ok w/ staff token
+    # 401 unauthorized if no token (authentication)
+    # 401 unauthorized if malformed token (authentication)
+    # 401 unauthorized if different non-staff user's token (authorization)
+    # OTHER TESTS:
+    # favorite record is not duplicated when added twice
+    # 400 user cannot add a story they posted to their favorites
+    # 404 if {username} not found w/ staff token
+    # 404 if story_id not found w/ staff token
+
     # DELETE /{username}/favorites
+    # works ok w/ user token
+    # works ok w/ staff token
+    # 401 unauthorized if no token (authentication)
+    # 401 unauthorized if malformed token (authentication)
+    # 401 unauthorized if different non-staff user's token (authorization)
+    # OTHER TESTS:
+    # works ok to DELETE same story_id twice?
+    # 404 if {username} not found w/ staff token
+    # 404 if story_id not found w/ staff token
 
 
-# FAVORITES ROUTES

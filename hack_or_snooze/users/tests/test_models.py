@@ -63,7 +63,7 @@ class UserModelTestCase(TestCase):
         # check user instance has hashed password:
         self.assertTrue(new_user.check_password(new_user_data.password))
 
-    def test_signup_fails_with_duplicate_username(self):
+    def test_signup_fail_duplicate_username(self):
         """Test User signup method throws Integrity error when adding duplicate
         username."""
 
@@ -91,7 +91,7 @@ class UserModelTestCase(TestCase):
         self.assertIsInstance(logged_in_user, User)
         self.assertEqual(self.test_user.username, logged_in_user.username)
 
-    def test_login_fails_with_incorrect_password(self):
+    def test_login_fail_incorrect_password(self):
         """Test login method raises AuthenticationError on incorrect
         password."""
 
@@ -103,7 +103,7 @@ class UserModelTestCase(TestCase):
         with self.assertRaises(AuthenticationError):
             User.login(bad_login_data)
 
-    def test_login_fails_with_nonexistent_username(self):
+    def test_login_fail_nonexistent_username(self):
         """Test login method raises ObjectDoesNotExist on nonexistent
         username."""
 
