@@ -263,7 +263,7 @@ class APIAuthTestCase(TestCase):
 
     def test_login_fail_username_does_not_exist(self):
         invalid_data = {
-            "username": "nonexistent_user",
+            "username": "nonexistent",
             "password": "password"
         }
 
@@ -305,6 +305,16 @@ class APIAuthTestCase(TestCase):
 class APIUserTestCase(TestCase):
     """Test /users endpoints"""
 
+    # GET /{username}
+    # works ok w/ user token ✅
+    # works ok w/ staff token ✅
+    # 401 unauthorized if no token header (authentication) ✅
+    # 401 unauthorized if token header blank (authentication) ✅
+    # 401 unauthorized if malformed token (authentication) ✅
+    # 401 unauthorized if invalid token (authentication) ✅
+    # 401 unauthorized if different non-staff user's token (authorization) ✅
+    # 404 if user not found w/ staff token ✅
+
     def setUp(self):
         # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
         # tokens get regenerated every time:
@@ -316,7 +326,7 @@ class APIUserTestCase(TestCase):
         self.user2_token = generate_token(self.user_2.username)
         self.staff_user_token = generate_token(self.staff_user.username)
 
-    def test_get_user_info_ok_as_self(self):
+    def test_get_user_ok_as_self(self):
         """Test that a user can get their own user information with a valid
         token."""
 
@@ -340,7 +350,7 @@ class APIUserTestCase(TestCase):
             }
         )
 
-    def test_get_user_info_ok_as_staff(self):
+    def test_get_user_ok_as_staff(self):
         """Test that a staff user can get a different user's information with a
         valid token."""
 
@@ -364,7 +374,7 @@ class APIUserTestCase(TestCase):
             }
         )
 
-    def test_get_user_info_fail_no_token_header(self):
+    def test_get_user_unauthorized_no_token_header(self):
 
         response = self.client.get(
             '/api/users/user'
@@ -378,7 +388,7 @@ class APIUserTestCase(TestCase):
             }
         )
 
-    def test_get_user_info_fail_token_header_blank(self):
+    def test_get_user_unauthorized_token_header_empty(self):
 
         response = self.client.get(
             '/api/users/user',
@@ -393,11 +403,11 @@ class APIUserTestCase(TestCase):
             }
         )
 
-    def test_get_user_info_fail_malformed_token(self):
+    def test_get_user_unauthorized_malformed_token(self):
 
         response = self.client.get(
             '/api/users/user',
-            headers={AUTH_KEY: 'bad_token'}
+            headers={AUTH_KEY: 'malformed::token'}
         )
 
         self.assertEqual(response.status_code, 401)
@@ -408,14 +418,53 @@ class APIUserTestCase(TestCase):
             }
         )
 
-    # GET /{username}
-    # works ok w/ user token ✅
-    # works ok w/ staff token ✅
-    # 401 unauthorized if no token header (authentication) ✅
-    # 401 unauthorized if token header blank (authentication) ✅
-    # 401 unauthorized if malformed token (authentication)
-    # 401 unauthorized if different non-staff user's token (authorization)
-    # 404 if user not found w/ staff token
+    def test_get_user_unauthorized_invalid_token(self):
+
+        response = self.client.get(
+            '/api/users/user',
+            headers={AUTH_KEY: 'user:abcdef123456'}
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_get_user_unauthorized_as_different_user(self):
+
+        response = self.client.get(
+            '/api/users/user',
+            headers={AUTH_KEY: self.user2_token}
+        )
+
+        self.assertEqual(response.status_code, 401)
+        # FIXME: currently the "different user" checks return a slightly
+        # different response than the generic Unauthorized message produced
+        # during schema validation. do we want to normalize these?
+        self.assertJSONEqual(
+            response.content,
+            {
+                "error": "Unauthorized"
+            }
+        )
+
+    def test_get_user_bad_request_nonexistent_user_as_staff(self):
+
+        response = self.client.get(
+            '/api/users/nonexistent',
+            headers={AUTH_KEY: self.staff_user_token}
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
 
     # PATCH /{username}
     # works ok w/ user token
