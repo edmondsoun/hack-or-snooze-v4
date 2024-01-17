@@ -9,6 +9,8 @@ from django.test import TestCase
 
 # from users.models import User
 from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
+
+# NOTE: do we want to use AUTH_KEY constant or hardcode string "token" in tests?
 from users.auth_utils import generate_token, AUTH_KEY
 # from users.schemas import SignupInput, LoginInput
 
