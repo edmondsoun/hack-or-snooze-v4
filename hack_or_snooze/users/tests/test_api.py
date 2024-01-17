@@ -14,6 +14,10 @@ from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
 from users.auth_utils import generate_token, AUTH_KEY
 # from users.schemas import SignupInput, LoginInput
 
+EMPTY_TOKEN_VALUE = ''
+MALFORMED_TOKEN_VALUE = 'malformed::token'
+INVALID_TOKEN_VALUE = 'user:abcdef123456'
+
 
 class APIAuthTestCase(TestCase):
     def setUp(self):
@@ -92,7 +96,7 @@ class APIAuthTestCase(TestCase):
             }
         )
 
-    def test_signup_fail_extra_fields(self):
+    def test_signup_fail_unprocessable_extra_fields(self):
         invalid_data = {
             **self.valid_signup_data,
             "extra_field": "extra_value"
@@ -233,7 +237,7 @@ class APIAuthTestCase(TestCase):
             }
         )
 
-    def test_login_fail_extra_fields(self):
+    def test_login_fail_unprocessable_extra_fields(self):
         invalid_data = {
             **self.valid_login_data,
             "extra_field": "extra_value"
@@ -366,22 +370,7 @@ class APIUserGetTestCase(TestCase):
             }
         )
 
-    def test_get_user_bad_request_nonexistent_user_as_staff(self):
-
-        response = self.client.get(
-            '/api/users/nonexistent',
-            headers={AUTH_KEY: self.staff_user_token}
-        )
-
-        self.assertEqual(response.status_code, 404)
-        self.assertJSONEqual(
-            response.content,
-            {
-                'detail': 'Not Found'
-            }
-        )
-
-    def test_get_user_unauthorized_no_token_header(self):
+    def test_get_user_fail_unauthorized_no_token_header(self):
 
         response = self.client.get(
             '/api/users/user'
@@ -395,11 +384,11 @@ class APIUserGetTestCase(TestCase):
             }
         )
 
-    def test_get_user_unauthorized_token_header_empty(self):
+    def test_get_user_fail_unauthorized_token_header_empty(self):
 
         response = self.client.get(
             '/api/users/user',
-            headers={AUTH_KEY: ''}
+            headers={AUTH_KEY: EMPTY_TOKEN_VALUE}
         )
 
         self.assertEqual(response.status_code, 401)
@@ -410,11 +399,11 @@ class APIUserGetTestCase(TestCase):
             }
         )
 
-    def test_get_user_unauthorized_malformed_token(self):
+    def test_get_user_fail_unauthorized_malformed_token(self):
 
         response = self.client.get(
             '/api/users/user',
-            headers={AUTH_KEY: 'malformed::token'}
+            headers={AUTH_KEY: MALFORMED_TOKEN_VALUE}
         )
 
         self.assertEqual(response.status_code, 401)
@@ -425,11 +414,11 @@ class APIUserGetTestCase(TestCase):
             }
         )
 
-    def test_get_user_unauthorized_invalid_token(self):
+    def test_get_user_fail_unauthorized_invalid_token(self):
 
         response = self.client.get(
             '/api/users/user',
-            headers={AUTH_KEY: 'user:abcdef123456'}
+            headers={AUTH_KEY: INVALID_TOKEN_VALUE}
         )
 
         self.assertEqual(response.status_code, 401)
@@ -440,7 +429,7 @@ class APIUserGetTestCase(TestCase):
             }
         )
 
-    def test_get_user_unauthorized_as_different_user(self):
+    def test_get_user_fail_unauthorized_as_different_user(self):
 
         response = self.client.get(
             '/api/users/user',
@@ -455,6 +444,21 @@ class APIUserGetTestCase(TestCase):
             response.content,
             {
                 "error": "Unauthorized"
+            }
+        )
+
+    def test_get_user_fail_bad_request_nonexistent_user_as_staff(self):
+
+        response = self.client.get(
+            '/api/users/nonexistent',
+            headers={AUTH_KEY: self.staff_user_token}
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
             }
         )
 
@@ -509,6 +513,60 @@ class APIUserPatchTestCase(TestCase):
                 "first_name": "newFirst",
             }),
             headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "newFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_patch_user_ok_all_fields_as_staff(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "newFirst",
+                    "last_name": "newLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_patch_user_ok_some_fields_as_staff(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "first_name": "newFirst",
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
             content_type="application/json"
         )
 
@@ -583,19 +641,205 @@ class APIUserPatchTestCase(TestCase):
             }
         )
 
-    # PATCH /{username}
-    # works ok as self, all fields submitted ✅
-    # works ok as self, only some fields submitted ✅
-    # works ok as self, updating password re-hashes before storing ✅
-    # works ok w/ staff token
-    # 401 unauthorized if no token (authentication)
-    # 401 unauthorized if malformed token (authentication)
-    # 401 unauthorized if different non-staff user's token (authorization)
-    # 404 if user not found w/ staff token
-    # 400 friendly error if first name or last name is blank
-    # 400 friendly error if no fields submitted
-    # error if some/all fields contain blank strings as values
-    # 422 if extra fields submitted
+    def test_patch_user_fail_unauthorized_no_token_header(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_patch_user_fail_unauthorized_token_header_empty(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: EMPTY_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_patch_user_fail_unauthorized_malformed_token(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: MALFORMED_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_patch_user_fail_unauthorized_invalid_token(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: INVALID_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_patch_user_fail_unauthorized_as_different_user(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+
+        self.assertEqual(response.status_code, 401)
+        # FIXME: currently the "different user" checks return a slightly
+        # different response than the generic Unauthorized message produced
+        # during schema validation. do we want to normalize these?
+        self.assertJSONEqual(
+            response.content,
+            {
+                "error": "Unauthorized"
+            }
+        )
+
+    def test_patch_user_fail_bad_request_nonexistent_user_as_staff(self):
+
+        response = self.client.patch(
+            '/api/users/nonexistent',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
+    def test_patch_user_fail_unprocessable_extra_fields(self):
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": "newLast",
+                "extra_field": "extra_value"
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": [
+                    {
+                        "type": "extra_forbidden",
+                        "loc": [
+                            "body",
+                            "data",
+                            "extra_field"
+                        ],
+                        "msg": "Extra inputs are not permitted"
+                    }
+                ]
+            }
+        )
+
+    # FIXME: test fails right now; this is intentional.
+    # TODO: rename/refactor once new validators are in place:
+    def test_patch_user_fail_empty_body(self):
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({}),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "error": "Must provide data to patch."
+            }
+        )
+
+    # FIXME: test fails right now; this is intentional.
+    # TODO: rename/refactor once new validators are in place.
+    def test_patch_user_fail_patch_data_contains_empty_strings(self):
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "",
+                "last_name": "",
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "error": "Provided fields cannot be empty strings."
+            }
+        )
 
 
 class APIFavoriteTestCase(TestCase):
@@ -635,3 +879,19 @@ class APIFavoriteTestCase(TestCase):
     # 401 unauthorized if invalid token (authentication) ✅
     # 401 unauthorized if different non-staff user's token (authorization) ✅
     # 404 if user not found w/ staff token ✅
+
+    # PATCH /{username}
+    # works ok as self, all fields submitted ✅
+    # works ok as self, only some fields submitted ✅
+    # works ok as self, updating password re-hashes before storing ✅
+    # works ok as staff, all fields submitted ✅
+    # works ok as staff, only some fields submitted ✅
+    # 401 unauthorized if no token (authentication) ✅
+    # 401 unauthorized if malformed token (authentication) ✅
+    # 401 unauthorized if invalid token (authentication) ✅
+    # 401 unauthorized if different non-staff user's token (authorization) ✅
+    # 404 if user not found w/ staff token ✅
+    # 422 if extra fields submitted✅
+    # error if no fields submitted ⚠️ - needs validator updates to pass
+    # error if fields contain blank strings as values ⚠️ - needs validator updates to pass
+
