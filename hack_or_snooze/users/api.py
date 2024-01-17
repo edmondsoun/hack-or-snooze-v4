@@ -215,7 +215,7 @@ def update_user(request, username: str, data: UserPatchInput):
 
 ######## FAVORITES ############################################################
 
-#FIXME: find a better name for username
+# FIXME: find a better name for username
 @router.post(
     '/{str:username}/favorites',
     response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
