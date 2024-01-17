@@ -9,6 +9,7 @@ from django.test import TestCase
 
 # from users.models import User
 from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
+from users.auth_utils import generate_token, AUTH_KEY
 # from users.schemas import SignupInput, LoginInput
 
 
@@ -45,7 +46,7 @@ class APIAuthTestCase(TestCase):
         self.assertEqual(
             response_json,
             {
-                "token": "test:098f6bcd4621",
+                AUTH_KEY: "test:098f6bcd4621",
                 "user": {
                     "stories": [],
                     "favorites": [],
@@ -153,6 +154,8 @@ class APIAuthTestCase(TestCase):
             content_type="application/json"
         )
 
+        # FIXME: this needs to have its response updated to match new approach
+        # to validation:
         self.assertEqual(response.status_code, 422)
         self.assertJSONEqual(
             response.content,
@@ -185,7 +188,7 @@ class APIAuthTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                "token": "user:ee11cbb19052",
+                AUTH_KEY: "user:ee11cbb19052",
                 "user": {
                     "stories": [],
                     "favorites": [],
@@ -301,17 +304,23 @@ class APIUserTestCase(TestCase):
     """Test /users endpoints"""
 
     def setUp(self):
+        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
+        # tokens get regenerated every time:
         self.user = UserFactory()
         self.user_2 = UserFactory(username="user2")
-        self.admin = UserFactory(username="admin", is_staff=True)
+        self.staff_user = UserFactory(username="staffUser", is_staff=True)
 
-    def test_get_own_user_info_ok(self):
+        self.user_token = generate_token(self.user.username)
+        self.user2_token = generate_token(self.user_2.username)
+        self.staff_user_token = generate_token(self.staff_user.username)
+
+    def test_get_user_info_ok_as_self(self):
         """Test that a user can get their own user information with a valid
         token."""
 
         response = self.client.get(
             '/api/users/user',
-            headers={'token': 'user:ee11cbb19052'}
+            headers={AUTH_KEY: self.user_token}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -329,10 +338,79 @@ class APIUserTestCase(TestCase):
             }
         )
 
+    def test_get_user_info_ok_as_staff(self):
+        """Test that a staff user can get a different user's information with a
+        valid token."""
+
+        response = self.client.get(
+            '/api/users/user',
+            headers={AUTH_KEY: self.staff_user_token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_get_user_info_fail_no_token_header(self):
+
+        response = self.client.get(
+            '/api/users/user'
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_get_user_info_fail_token_header_blank(self):
+
+        response = self.client.get(
+            '/api/users/user',
+            headers={AUTH_KEY: ''}
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_get_user_info_fail_malformed_token(self):
+
+        response = self.client.get(
+            '/api/users/user',
+            headers={AUTH_KEY: 'bad_token'}
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
     # GET /{username}
-    # works ok w/ user token
-    # works ok w/ staff token
-    # 401 unauthorized if no token (authentication)
+    # works ok w/ user token ✅
+    # works ok w/ staff token ✅
+    # 401 unauthorized if no token header (authentication) ✅
+    # 401 unauthorized if token header blank (authentication) ✅
     # 401 unauthorized if malformed token (authentication)
     # 401 unauthorized if different non-staff user's token (authorization)
     # 404 if user not found w/ staff token
@@ -377,5 +455,3 @@ class APIFavoriteTestCase(TestCase):
     # works ok to DELETE same story_id twice?
     # 404 if {username} not found w/ staff token
     # 404 if story_id not found w/ staff token
-
-
