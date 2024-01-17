@@ -181,14 +181,9 @@ class APIAuthTestCase(TestCase):
             content_type="application/json"
         )
 
-        # TODO: can we set a timestamp on the user factory class so we don't
-        # have to dynamically access here?
-        response_json = json.loads(response.content)
-        response_date_joined = response_json["user"]["date_joined"]
-
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response_json,
+        self.assertJSONEqual(
+            response.content,
             {
                 "token": "user:ee11cbb19052",
                 "user": {
@@ -197,7 +192,7 @@ class APIAuthTestCase(TestCase):
                     "username": "user",
                     "first_name": "userFirst",
                     "last_name": "userLast",
-                    "date_joined": response_date_joined
+                    "date_joined": "2020-01-01T00:00:00Z"
                 }
             }
         )
@@ -301,8 +296,6 @@ class APIAuthTestCase(TestCase):
             }
         )
 
-# USERS ROUTES
-
 
 class APIUserTestCase(TestCase):
     """Test /users endpoints"""
@@ -311,6 +304,30 @@ class APIUserTestCase(TestCase):
         self.user = UserFactory()
         self.user_2 = UserFactory(username="user2")
         self.admin = UserFactory(username="admin", is_staff=True)
+
+    def test_get_own_user_info_ok(self):
+        """Test that a user can get their own user information with a valid
+        token."""
+
+        response = self.client.get(
+            '/api/users/user',
+            headers={'token': 'user:ee11cbb19052'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
 
     # GET /{username}
     # works ok w/ user token
