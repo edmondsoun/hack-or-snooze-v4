@@ -26,7 +26,7 @@ class ApiKey(APIKeyHeader):
         On failure, returns None. Error message JSON is automatically generated:
             {"detail": "Unauthorized"}
         """
-        print("in authenticate")
+        # print("in authenticate")
 
         if not check_token(token):
             return None
@@ -55,7 +55,7 @@ def generate_token(username):
 
     EX: "fluffy" -> "fluffy:ce7bcda695c3"
     """
-    print("in generate_token")
+    # print("in generate_token")
 
     hash = generate_hash(username)
 
@@ -68,7 +68,7 @@ def generate_hash(username):
 
     EX: "fluffy" -> "ce7bcda695c3"
     """
-    print("in generate_hash")
+    # print("in generate_hash")
 
     encoded_username = username.encode()
     h = md5()
@@ -78,7 +78,7 @@ def generate_hash(username):
     # STAFFNOTE: We are reducing the size of the hash for readability for the
     # students. PLEASE NEVER REALLY DO THIS
     truncated_hash = hashed_username[0:12]
-    print("truncated hash:", truncated_hash)
+    # print("truncated hash:", truncated_hash)
 
     return truncated_hash
 
@@ -89,7 +89,7 @@ def check_token(token):
 
     Returns a boolean.
     """
-    print("in check_token")
+    # print("in check_token")
 
     try:
         username, hash = token.split(":")
