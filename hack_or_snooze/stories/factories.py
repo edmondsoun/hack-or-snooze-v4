@@ -1,4 +1,6 @@
 import uuid
+import datetime
+
 import factory
 
 from factory import LazyFunction
@@ -18,3 +20,11 @@ class StoryFactory(factory.django.DjangoModelFactory):
     author = "test_author"
     title = "test_title"
     url = "http://test.com"
+    created = datetime.datetime(
+        2020, 1, 1, 0, 0, 0, 0,
+        tzinfo=datetime.timezone.utc
+    )
+    modified = datetime.datetime(
+        2020, 1, 1, 0, 0, 0, 0,
+        tzinfo=datetime.timezone.utc
+    )
