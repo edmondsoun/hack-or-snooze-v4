@@ -6,6 +6,10 @@ from django.conf import settings
 from model_utils.models import TimeStampedModel
 
 
+def generate_uuid():
+    """Generate a dynamic UUID to use for story IDs."""
+    return str(uuid.uuid4())
+
 class Story(TimeStampedModel, models.Model):
     """Story model."""
 
@@ -15,7 +19,7 @@ class Story(TimeStampedModel, models.Model):
     # The goal of using CharField instead of UUIDField here is to ensure that
     # the students *can* encounter a 404 without a lot of jumping through hoops
     id = models.CharField(
-        default=str(uuid.uuid4()),
+        default=generate_uuid,
         primary_key=True,
     )
 

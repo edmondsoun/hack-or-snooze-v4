@@ -7,7 +7,8 @@ from factory import LazyFunction
 
 from users.factories import UserFactory
 
-
+# FIXME: we're finding that multiple instances of StoryFactory get generated
+# with the same UUID. Need to debug this for testing.
 class StoryFactory(factory.django.DjangoModelFactory):
     """Factory Class for Users"""
 

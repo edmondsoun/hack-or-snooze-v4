@@ -1393,7 +1393,7 @@ class APIFavoriteDeleteTestCase(TestCase):
             headers={AUTH_KEY: self.user2_token},
             content_type="application/json"
         )
-
+        # breakpoint()
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -1476,7 +1476,7 @@ class APIFavoriteDeleteTestCase(TestCase):
     # works ok as staff, all fields submitted ✅
     # works ok as staff, only some fields submitted ✅
     # 401 unauthorized if no token (authentication) ✅
-    # 401 unauthorized if malformed token (authentication) ✅
+    # 401 unauthorized if malformed token (authentication) ✅``
     # 401 unauthorized if invalid token (authentication) ✅
     # 401 unauthorized if different non-staff user's token (authorization) ✅
     # 404 if user not found w/ staff token ✅

@@ -281,6 +281,8 @@ def delete_favorite(request, username: str, data: FavoriteDeleteInput):
 
     story = get_object_or_404(Story, id=story_id)
 
+    # STAFFNOTE: if you try to remove a story that isn't in your favorites,
+    # there is no negative consequence currently.
     user.favorites.remove(story)
 
     return {"user": user}

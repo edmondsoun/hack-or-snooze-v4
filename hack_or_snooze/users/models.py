@@ -83,7 +83,8 @@ class User(AbstractUser):
             raise AuthenticationError("Unauthorized")
 
     def update(self, patch_data):
-        """Update user record and return updated user instance."""
+        """Update user record and return updated user instance.
+        #TODO: docstring here"""
 
         # TODO: need a 2nd set of eyes on this, since it was part of a major
         # bugfix.
