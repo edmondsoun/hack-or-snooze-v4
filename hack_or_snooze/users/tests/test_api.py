@@ -7,12 +7,14 @@ from django.test import TestCase
 
 # from ninja.errors import AuthenticationError
 
-from users.models import User
+# from users.models import User
 from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
-
 # NOTE: do we want to use AUTH_KEY constant or hardcode string "token" in tests?
 from users.auth_utils import generate_token, AUTH_KEY
 # from users.schemas import SignupInput, LoginInput
+
+from stories.factories import StoryFactory
+
 
 EMPTY_TOKEN_VALUE = ''
 MALFORMED_TOKEN_VALUE = 'malformed::token'
@@ -737,7 +739,6 @@ class APIUserPatchTestCase(TestCase):
             content_type="application/json"
         )
 
-
         self.assertEqual(response.status_code, 401)
         # FIXME: currently the "different user" checks return a slightly
         # different response than the generic Unauthorized message produced
@@ -842,31 +843,619 @@ class APIUserPatchTestCase(TestCase):
         )
 
 
-class APIFavoriteTestCase(TestCase):
-    """Test /user/{username}/favorites endpoints"""
-    # POST /{username}/favorites
-    # works ok w/ user token
-    # works ok w/ staff token
-    # 401 unauthorized if no token (authentication)
-    # 401 unauthorized if malformed token (authentication)
-    # 401 unauthorized if different non-staff user's token (authorization)
-    # OTHER TESTS:
-    # favorite record is not duplicated when added twice
-    # 400 user cannot add a story they posted to their favorites
-    # 404 if {username} not found w/ staff token
-    # 404 if story_id not found w/ staff token
+class APIFavoritePostTestCase(TestCase):
+    """Test POST /user/{username}/favorites endpoint."""
 
-    # DELETE /{username}/favorites
-    # works ok w/ user token
-    # works ok w/ staff token
-    # 401 unauthorized if no token (authentication)
-    # 401 unauthorized if malformed token (authentication)
-    # 401 unauthorized if different non-staff user's token (authorization)
-    # OTHER TESTS:
-    # works ok to DELETE same story_id twice?
-    # 404 if {username} not found w/ staff token
-    # 404 if story_id not found w/ staff token
+    def setUp(self):
+        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
+        # tokens get regenerated every time:
+        self.user = UserFactory()
+        self.user_2 = UserFactory(username="user2")
+        self.staff_user = UserFactory(username="staffUser", is_staff=True)
 
+        # by default, a story created by StoryFactory was posted by "user":
+        self.story = StoryFactory()
+
+        self.user_token = generate_token(self.user.username)
+        self.user2_token = generate_token(self.user_2.username)
+        self.staff_user_token = generate_token(self.staff_user.username)
+
+    def test_add_favorite_ok_as_self(self):
+
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_add_favorite_ok_as_staff(self):
+
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_add_favorite_fail_unauthorized_no_token_header(self):
+
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_add_favorite_fail_unauthorized_token_header_empty(self):
+
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: EMPTY_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_add_favorite_fail_unauthorized_malformed_token(self):
+
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: MALFORMED_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_add_favorite_fail_unauthorized_invalid_token(self):
+
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: INVALID_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_add_favorite_fail_unauthorized_as_different_user(self):
+
+        response = self.client.post(
+            '/api/users/user/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        # FIXME: currently the "different user" checks return a slightly
+        # different response than the generic Unauthorized message produced
+        # during schema validation. do we want to normalize these?
+        self.assertJSONEqual(
+            response.content,
+            {
+                "error": "Unauthorized"
+            }
+        )
+
+    def test_add_favorite_fail_does_not_add_same_favorite_twice(self):
+        """NOTE: this will 'silently fail' by merit of the default behavior of
+        Django's ManyToManyField. Should we alter test name/find a way to make
+        this more clear? """
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+        add_same_favorite_response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(add_same_favorite_response.status_code, 200)
+        self.assertJSONEqual(
+            add_same_favorite_response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_add_favorite_fail_cannot_add_own_story_to_favorites(self):
+
+        response = self.client.post(
+            '/api/users/user/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'error': 'Cannot add own user stories to favorites'
+            }
+        )
+
+    def test_add_favorite_fail_bad_request_nonexistent_user_as_staff(self):
+        response = self.client.post(
+            '/api/users/nonexistent/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        # TODO: should we try to customize this error message to make it clear
+        # it's the user who isn't found?
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
+    def test_add_favorite_fail_bad_request_nonexistent_story_as_staff(self):
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": "does-not-exist"
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        # TODO: should we try to customize this error message to make it clear
+        # it's the story that isn't found?
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
+
+class APIFavoriteDeleteTestCase(TestCase):
+    """Test DELETE /user/{username}/favorites endpoint."""
+
+    def setUp(self):
+        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
+        # tokens get regenerated every time:
+        self.user = UserFactory()
+        self.user_2 = UserFactory(username="user2")
+        self.staff_user = UserFactory(username="staffUser", is_staff=True)
+
+        # by default, a story created by StoryFactory was posted by "user":
+        self.story = StoryFactory()
+
+        # pre-emptively add this story to user_2's favorites:
+        self.user_2.favorites.add(self.story)
+
+        self.user_token = generate_token(self.user.username)
+        self.user2_token = generate_token(self.user_2.username)
+        self.staff_user_token = generate_token(self.staff_user.username)
+
+    def test_delete_favorite_ok_as_self(self):
+
+        # Sanity check: user_2 has at least 1 favorite currently
+        self.assertTrue(self.user_2.favorites.exists())
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_delete_favorite_ok_as_staff(self):
+
+        # Sanity check: user_2 has at least 1 favorite currently
+        self.assertTrue(self.user_2.favorites.exists())
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_delete_favorite_fail_unauthorized_no_token_header(self):
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_favorite_fail_unauthorized_token_header_empty(self):
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: EMPTY_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_favorite_fail_unauthorized_malformed_token(self):
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: MALFORMED_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_favorite_fail_unauthorized_invalid_token(self):
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: INVALID_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_favorite_fail_unauthorized_as_different_user(self):
+
+        response = self.client.delete(
+            '/api/users/user/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        # FIXME: currently the "different user" checks return a slightly
+        # different response than the generic Unauthorized message produced
+        # during schema validation. do we want to normalize these?
+        self.assertJSONEqual(
+            response.content,
+            {
+                "error": "Unauthorized"
+            }
+        )
+
+    def test_delete_favorite_fail_does_not_delete_same_favorite_twice(self):
+        """NOTE: this will 'silently fail' by merit of the default behavior of
+        Django's ManyToManyField. Should we alter test name/find a way to make
+        this more clear? """
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+        delete_same_favorite_response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(delete_same_favorite_response.status_code, 200)
+        self.assertJSONEqual(
+            delete_same_favorite_response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    # FIXME: currently new_story has the same ID as self.story, need to debug this
+    def test_delete_favorite_no_effect_delete_story_not_in_favorites(self):
+
+        new_story = StoryFactory(id="delete-me")
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": new_story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_delete_favorite_fail_bad_request_nonexistent_user_as_staff(self):
+        response = self.client.delete(
+            '/api/users/nonexistent/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        # TODO: should we try to customize this error message to make it clear
+        # it's the user who isn't found?
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
+    def test_delete_favorite_fail_bad_request_nonexistent_story_as_staff(self):
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": "does-not-exist"
+            }),
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        # TODO: should we try to customize this error message to make it clear
+        # it's the story that isn't found?
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
 
 # DONE:
 
@@ -895,3 +1484,30 @@ class APIFavoriteTestCase(TestCase):
     # error if no fields submitted ⚠️ - needs validator updates to pass
     # error if fields contain blank strings as values ⚠️ - needs validator updates to pass
 
+    # POST /{username}/favorites
+    # works ok w/ user token ✅
+    # works ok w/ staff token ✅
+    # 401 unauthorized if no token (authentication) ✅
+    # 401 unauthorized if malformed token (authentication) ✅
+    # 401 unauthorized if invalid token (authentication) ✅
+    # 401 unauthorized if different non-staff user's token (authorization) ✅
+    # OTHER TESTS:
+    # favorite record is not duplicated when added twice ✅
+    # 400 user cannot add a story they posted to their favorites ✅
+    # 404 if {username} not found w/ staff token ✅
+    # 404 if story_id not found w/ valid user token ⚠️
+    # 404 if story_id not found w/ staff token ✅
+
+    # DELETE /{username}/favorites
+    # works ok w/ user token ✅
+    # works ok w/ staff token ✅
+    # 401 unauthorized if no token (authentication) ✅
+    # 401 unauthorized if malformed token (authentication) ✅
+    # 401 unauthorized if invalid token (authentication) ✅
+    # 401 unauthorized if different non-staff user's token (authorization) ✅
+    # OTHER TESTS:
+    # works ok to DELETE same story_id twice ✅
+    # works ok to DELETE story not in favorites ⚠️ needs full rework
+    # 404 if {username} not found w/ staff token ✅
+    # 404 if story_id not found w/ valid user token ⚠️
+    # 404 if story_id not found w/ staff token ✅
