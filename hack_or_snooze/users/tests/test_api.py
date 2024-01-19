@@ -331,9 +331,6 @@ class APIUserGetTestCase(TestCase):
         """Test that a user can get their own user information with a valid
         token."""
 
-        breakpoint()
-
-
         response = self.client.get(
             '/api/users/user',
             headers={AUTH_KEY: self.user_token}
