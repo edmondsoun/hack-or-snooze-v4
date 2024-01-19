@@ -333,6 +333,73 @@ class APIStoriesPostTestCase(TestCase):
             }
         )
 
+
+class APIStoriesGETAllTestCase(TestCase):
+    """Test POST /stories endpoint."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.story_1 = StoryFactory()
+        cls.story_2 = StoryFactory()
+
+    # def setUp(self):
+    #     # clear up the stories on each user before we proceed to next test
+    #     APIStoriesPostTestCase.user.stories.all().delete()
+    #     APIStoriesPostTestCase.user_2.stories.all().delete()
+    #     APIStoriesPostTestCase.staff_user.stories.all().delete()
+
+    #     self.valid_data = {
+    #         "author": "post_test_author",
+    #         "title": "post_test_title",
+    #         "url": "post_test_url"
+    #     }
+
+    def test_get_all_stories_works(self):
+        response = self.client.get(
+            '/api/stories/',
+            content_type="application/json"
+        )
+
+        # extract the date_time fields from the json to insert into our
+        # test
+        response_json = json.loads(response.content)
+        response_dates_story1 = {
+            "created": response_json["stories"][0]["created"],
+            "modified": response_json["stories"][0]["modified"]
+        }
+        response_dates_story2 = {
+            "created": response_json["stories"][0]["created"],
+            "modified": response_json["stories"][0]["modified"]
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "stories": [
+                    {
+                        "username": self.story_1.user.username,
+                        "id": self.story_1.id,
+                        "title": self.story_1.title,
+                        "author": self.story_1.author,
+                        "url": self.story_1.url,
+                        "created": response_dates_story1["created"],
+                        "modified": response_dates_story1["modified"]
+                    },
+                    {
+                        "username": self.story_2.user.username,
+                        "id": self.story_2.id,
+                        "title": self.story_2.title,
+                        "author": self.story_2.author,
+                        "url": self.story_2.url,
+                        "created": response_dates_story2["created"],
+                        "modified": response_dates_story2["modified"]
+                    }
+
+                ]
+            }
+        )
+
 # POST /
 # works ok w/ user token ✅
 # works ok w/ staff token ✅
@@ -346,6 +413,9 @@ class APIStoriesPostTestCase(TestCase):
 # 422 data wrong type✅
 
 # GET /
+# works ok
+
+# GET /{story_id}
 # works ok w/ user token
 # works ok w/ staff token
 # 401 unauthorized if no token header (authentication)
@@ -355,17 +425,7 @@ class APIStoriesPostTestCase(TestCase):
 # 401 unauthorized if different non-staff user's token (authorization)
 # 404 if user not found w/ staff token
 
-# GET /{username}
-# works ok w/ user token
-# works ok w/ staff token
-# 401 unauthorized if no token header (authentication)
-# 401 unauthorized if token header blank (authentication)
-# 401 unauthorized if malformed token (authentication)
-# 401 unauthorized if invalid token (authentication)
-# 401 unauthorized if different non-staff user's token (authorization)
-# 404 if user not found w/ staff token
-
-# DELETE /{username}/favorites
+# DELETE /stores/{story_id}
 # works ok w/ user token
 # works ok w/ staff token
 # 401 unauthorized if no token (authentication)
