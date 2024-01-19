@@ -400,6 +400,61 @@ class APIStoriesGETAllTestCase(TestCase):
             }
         )
 
+
+class APIStoriesGETOneTestCase(TestCase):
+    """Test POST /stories endpoint."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.story_1 = StoryFactory()
+
+    def test_stories_get_one_works(self):
+
+        response = self.client.get(
+            f'/api/stories/{self.story_1.id}',
+            content_type="application/json"
+        )
+
+        # extract the date_time fields from the json to insert into our
+        # test
+        response_json = json.loads(response.content)
+        response_dates_story1 = {
+            "created": response_json["story"]["created"],
+            "modified": response_json["story"]["modified"]
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "story": {
+                    "username": self.story_1.user.username,
+                    "id": self.story_1.id,
+                    "title": self.story_1.title,
+                    "author": self.story_1.author,
+                    "url": self.story_1.url,
+                    "created": response_dates_story1["created"],
+                    "modified": response_dates_story1["modified"]
+                }
+            }
+        )
+
+    def test_stories_get_one_404(self):
+
+        response = self.client.get(
+            '/api/stories/nonexistent-id',
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Not Found"
+            }
+        )
+
+
 # POST /
 # works ok w/ user token ✅
 # works ok w/ staff token ✅
@@ -413,17 +468,11 @@ class APIStoriesGETAllTestCase(TestCase):
 # 422 data wrong type✅
 
 # GET /
-# works ok
+# works ok✅
 
 # GET /{story_id}
-# works ok w/ user token
-# works ok w/ staff token
-# 401 unauthorized if no token header (authentication)
-# 401 unauthorized if token header blank (authentication)
-# 401 unauthorized if malformed token (authentication)
-# 401 unauthorized if invalid token (authentication)
-# 401 unauthorized if different non-staff user's token (authorization)
-# 404 if user not found w/ staff token
+# works ok✅
+# 404 if user not found✅
 
 # DELETE /stores/{story_id}
 # works ok w/ user token
