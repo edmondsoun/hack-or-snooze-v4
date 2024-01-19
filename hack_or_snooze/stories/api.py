@@ -83,12 +83,6 @@ def get_stories(request):
     return {"stories": stories}
 
 
-# 3 possible errors:
-# 1: You did not give me a UUID
-# 2: You gave me something that appears to be a UUID but it's not formatted
-#    correctly
-# 3: You gave me a proper UUID, but there is no such id in the DB
-
 @router.get(
     '/{story_id}',
     response=StoryGetOutput
