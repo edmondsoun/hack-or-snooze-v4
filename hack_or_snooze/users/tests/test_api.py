@@ -24,6 +24,7 @@ INVALID_TOKEN_VALUE = 'user:abcdef123456'
 class APIAuthTestCase(TestCase):
     def setUp(self):
         # TODO: investigate why this is outside setup in SIS?
+        breakpoint()
         self.existing_user = UserFactory()
 
         self.valid_signup_data = {
@@ -1393,7 +1394,7 @@ class APIFavoriteDeleteTestCase(TestCase):
             headers={AUTH_KEY: self.user2_token},
             content_type="application/json"
         )
-        # breakpoint()
+        breakpoint()
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
