@@ -24,7 +24,7 @@ INVALID_TOKEN_VALUE = 'user:abcdef123456'
 class APIAuthTestCase(TestCase):
     def setUp(self):
         # TODO: investigate why this is outside setup in SIS?
-        breakpoint()
+        
         self.existing_user = UserFactory()
 
         self.valid_signup_data = {
@@ -317,8 +317,10 @@ class APIUserGetTestCase(TestCase):
     def setUp(self):
         # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
         # tokens get regenerated every time:
+        
         self.user = UserFactory()
         self.user_2 = UserFactory(username="user2")
+
         self.staff_user = UserFactory(username="staffUser", is_staff=True)
 
         self.user_token = generate_token(self.user.username)
@@ -328,6 +330,9 @@ class APIUserGetTestCase(TestCase):
     def test_get_user_ok_as_self(self):
         """Test that a user can get their own user information with a valid
         token."""
+
+        breakpoint()
+
 
         response = self.client.get(
             '/api/users/user',
@@ -1382,9 +1387,9 @@ class APIFavoriteDeleteTestCase(TestCase):
         )
 
     # FIXME: currently new_story has the same ID as self.story, need to debug this
-    def test_delete_favorite_no_effect_delete_story_not_in_favorites(self):
+    def test_delete_favorite_no_effect_on_story_not_in_favorites(self):
 
-        new_story = StoryFactory(id="delete-me")
+        new_story = StoryFactory()
 
         response = self.client.delete(
             '/api/users/user2/favorites',
@@ -1394,7 +1399,6 @@ class APIFavoriteDeleteTestCase(TestCase):
             headers={AUTH_KEY: self.user2_token},
             content_type="application/json"
         )
-        breakpoint()
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
