@@ -335,7 +335,7 @@ class APIStoriesPostTestCase(TestCase):
 
 
 class APIStoriesGETAllTestCase(TestCase):
-    """Test POST /stories endpoint."""
+    """Test GET /stories endpoint."""
 
     @classmethod
     def setUpTestData(cls):
@@ -390,7 +390,7 @@ class APIStoriesGETAllTestCase(TestCase):
 
 
 class APIStoriesGETOneTestCase(TestCase):
-    """Test POST /stories endpoint."""
+    """Test GET /stories/{story_id} endpoint."""
 
     @classmethod
     def setUpTestData(cls):
@@ -610,4 +610,4 @@ class APIStoriesDELETETestCase(TestCase):
 # 401 unauthorized if invalid token (authentication)✅
 # 401 unauthorized if different non-staff user's token (authorization)✅
 # OTHER TESTS:
-# 404 if story_id not found
+# 404 if story_id not found✅
