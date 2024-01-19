@@ -342,18 +342,6 @@ class APIStoriesGETAllTestCase(TestCase):
         cls.story_1 = StoryFactory()
         cls.story_2 = StoryFactory()
 
-    # def setUp(self):
-    #     # clear up the stories on each user before we proceed to next test
-    #     APIStoriesPostTestCase.user.stories.all().delete()
-    #     APIStoriesPostTestCase.user_2.stories.all().delete()
-    #     APIStoriesPostTestCase.staff_user.stories.all().delete()
-
-    #     self.valid_data = {
-    #         "author": "post_test_author",
-    #         "title": "post_test_title",
-    #         "url": "post_test_url"
-    #     }
-
     def test_get_all_stories_works(self):
         response = self.client.get(
             '/api/stories/',
