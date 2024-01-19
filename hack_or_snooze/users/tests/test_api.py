@@ -24,7 +24,7 @@ INVALID_TOKEN_VALUE = 'user:abcdef123456'
 class APIAuthTestCase(TestCase):
     def setUp(self):
         # TODO: investigate why this is outside setup in SIS?
-        
+
         self.existing_user = UserFactory()
 
         self.valid_signup_data = {
@@ -317,7 +317,7 @@ class APIUserGetTestCase(TestCase):
     def setUp(self):
         # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
         # tokens get regenerated every time:
-        
+
         self.user = UserFactory()
         self.user_2 = UserFactory(username="user2")
 
@@ -1138,6 +1138,26 @@ class APIFavoritePostTestCase(TestCase):
             }
         )
 
+    def test_add_favorite_fail_bad_request_nonexistent_story_as_self(self):
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": "does-not-exist"
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        # TODO: should we try to customize this error message to make it clear
+        # it's the story that isn't found?
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
     def test_add_favorite_fail_bad_request_nonexistent_story_as_staff(self):
         response = self.client.post(
             '/api/users/user2/favorites',
@@ -1386,7 +1406,6 @@ class APIFavoriteDeleteTestCase(TestCase):
             }
         )
 
-    # FIXME: currently new_story has the same ID as self.story, need to debug this
     def test_delete_favorite_no_effect_on_story_not_in_favorites(self):
 
         new_story = StoryFactory()
@@ -1434,6 +1453,26 @@ class APIFavoriteDeleteTestCase(TestCase):
 
         # TODO: should we try to customize this error message to make it clear
         # it's the user who isn't found?
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
+    def test_delete_favorite_fail_bad_request_nonexistent_story_as_self(self):
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": "does-not-exist"
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        # TODO: should we try to customize this error message to make it clear
+        # it's the story that isn't found?
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(
             response.content,
@@ -1500,7 +1539,7 @@ class APIFavoriteDeleteTestCase(TestCase):
     # favorite record is not duplicated when added twice ✅
     # 400 user cannot add a story they posted to their favorites ✅
     # 404 if {username} not found w/ staff token ✅
-    # 404 if story_id not found w/ valid user token ⚠️
+    # 404 if story_id not found w/ valid user token ✅
     # 404 if story_id not found w/ staff token ✅
 
     # DELETE /{username}/favorites
@@ -1512,7 +1551,7 @@ class APIFavoriteDeleteTestCase(TestCase):
     # 401 unauthorized if different non-staff user's token (authorization) ✅
     # OTHER TESTS:
     # works ok to DELETE same story_id twice ✅
-    # works ok to DELETE story not in favorites ⚠️ needs full rework
+    # works ok to DELETE story not in favorites ✅
     # 404 if {username} not found w/ staff token ✅
-    # 404 if story_id not found w/ valid user token ⚠️
+    # 404 if story_id not found w/ valid user token ✅
     # 404 if story_id not found w/ staff token ✅
