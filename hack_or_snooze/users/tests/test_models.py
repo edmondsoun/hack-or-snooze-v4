@@ -1,12 +1,13 @@
 from django.test import TestCase
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.contrib.auth.hashers import check_password
 
 from ninja.errors import AuthenticationError
 
 from users.models import User
 from users.factories import UserFactory
-from users.schemas import SignupInput, LoginInput
+from users.schemas import SignupInput, LoginInput, UserPatchInput
 
 
 class UserModelTestCase(TestCase):
@@ -115,7 +116,47 @@ class UserModelTestCase(TestCase):
         with self.assertRaises(ObjectDoesNotExist):
             User.login(bad_login_data)
 
+    def test_update_ok_no_password(self):
+        patch_data = {
+            "first_name": "patch_test_first",
+            "last_name": "patch_test_last",
+        }
 
-# TODO:
-# FIXME:
-# Need tests for new .update method
+        self.test_user.update(patch_data)
+
+        self.assertEqual(
+            self.test_user.first_name,
+            patch_data["first_name"]
+        )
+        self.assertEqual(
+            self.test_user.last_name,
+            patch_data["last_name"]
+        )
+
+    def test_update_ok_with_password(self):
+        patch_data = {
+            "first_name": "patch_test_first",
+            "last_name": "patch_test_last",
+            "password": "patch_test_password"
+        }
+        
+        self.test_user.update(patch_data)
+
+        self.assertEqual(
+            self.test_user.first_name,
+            patch_data["first_name"]
+        )
+        self.assertEqual(
+            self.test_user.last_name,
+            patch_data["last_name"]
+        )
+        self.assertTrue(check_password(
+            patch_data["password"],
+            self.test_user.password
+        ))
+        self.assertNotEqual(
+            self.test_user.password,
+            patch_data["password"]
+        )
+
+#TODO: Add test that ensures instance == instance?
