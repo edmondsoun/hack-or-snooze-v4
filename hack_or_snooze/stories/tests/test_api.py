@@ -443,6 +443,146 @@ class APIStoriesGETOneTestCase(TestCase):
         )
 
 
+class APIStoriesDELETETestCase(TestCase):
+    """Test DELETE /stories endpoint."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        cls.user_2 = UserFactory(username="user2")
+        cls.staff_user = UserFactory(username="staffUser", is_staff=True)
+
+        cls.user_token = generate_token(cls.user.username)
+        cls.user2_token = generate_token(cls.user_2.username)
+        cls.staff_user_token = generate_token(cls.staff_user.username)
+
+        cls.story_1 = StoryFactory()
+
+    def test_delete_story_ok_as_self(self):
+
+        response = self.client.delete(
+            f'/api/stories/{self.story_1.id}',
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "deleted": True,
+                "id": self.story_1.id
+            }
+        )
+
+    def test_delete_story_ok_as_staff(self):
+
+        response = self.client.delete(
+            f'/api/stories/{self.story_1.id}',
+            headers={AUTH_KEY: self.staff_user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "deleted": True,
+                "id": self.story_1.id
+            }
+        )
+
+    def test_delete_story_fails_unauthorized_no_token_header(self):
+
+        response = self.client.delete(
+            f'/api/stories/{self.story_1.id}',
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_story_unauthorized_fails_token_header_empty(self):
+
+        response = self.client.delete(
+            f'/api/stories/{self.story_1.id}',
+            headers={AUTH_KEY: EMPTY_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_story_fails_unauthorized_malformed_token(self):
+
+        response = self.client.delete(
+            f'/api/stories/{self.story_1.id}',
+            headers={AUTH_KEY: MALFORMED_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_story_fails_unauthorized_invalid_token(self):
+
+        response = self.client.delete(
+            f'/api/stories/{self.story_1.id}',
+            headers={AUTH_KEY: INVALID_TOKEN_VALUE},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": "Unauthorized"
+            }
+        )
+
+    def test_delete_story_fails_unauthorized_wrong_user(self):
+        response = self.client.delete(
+            f'/api/stories/{self.story_1.id}',
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(
+            response.content,
+            {"error": "Unauthorized."}
+        )
+
+    def test_delete_story_fails_not_found(self):
+        response = self.client.delete(
+            '/api/stories/nonexistent-id',
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'detail': 'Not Found'
+            }
+        )
+
 # POST /
 # works ok w/ user token ✅
 # works ok w/ staff token ✅
@@ -463,15 +603,11 @@ class APIStoriesGETOneTestCase(TestCase):
 # 404 if user not found✅
 
 # DELETE /stores/{story_id}
-# works ok w/ user token
-# works ok w/ staff token
-# 401 unauthorized if no token (authentication)
-# 401 unauthorized if malformed token (authentication)
-# 401 unauthorized if invalid token (authentication)
-# 401 unauthorized if different non-staff user's token (authorization)
+# works ok w/ user token✅
+# works ok w/ staff token✅
+# 401 unauthorized if no token (authentication)✅
+# 401 unauthorized if malformed token (authentication)✅
+# 401 unauthorized if invalid token (authentication)✅
+# 401 unauthorized if different non-staff user's token (authorization)✅
 # OTHER TESTS:
-# works ok to DELETE same story_id twice
-# works ok to DELETE story not in favorites
-# 404 if {username} not found w/ staff token
-# 404 if story_id not found w/ valid user token
-# 404 if story_id not found w/ staff token
+# 404 if story_id not found
