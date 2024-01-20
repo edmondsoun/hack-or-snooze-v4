@@ -88,6 +88,21 @@ Exclude:
 ### Admin
 
 ### Model
+- validation error on blank first_name ✅
+- validation error on blank last_name ✅
+
+#### SIGNUP
+- ok
+- fail on duplicate username ✅
+
+#### LOGIN
+- ok
+- fail incorrect password ✅
+- fail nonexistent username ✅
+
+#### UPDATE
+- ok, no password ✅
+- ok, with password ✅
 
 ### API
 
@@ -118,11 +133,7 @@ Exclude:
 - error if no fields submitted ⚠️ - needs validator updates to pass
 - error if fields contain blank strings as values ⚠️ - needs validator updates to pass
 
-## FAVORITE
-
-### Admin
-
-### Model
+## FAVORITES
 
 ### API
 
@@ -163,6 +174,8 @@ Exclude:
 ### Admin
 
 ### Model
+- smoke test ✅
+- id is str ✅
 
 ### API
 
