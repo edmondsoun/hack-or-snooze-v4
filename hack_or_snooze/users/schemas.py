@@ -1,7 +1,6 @@
 import re
 from typing import List
-from typing_extensions import Annotated
-from pydantic import validator, model_validator, StringConstraints
+from pydantic import validator, model_validator
 
 from ninja import ModelSchema, Schema
 
@@ -35,7 +34,6 @@ class UserOutput(Schema):
 
 
 class UserPatchInput(ModelSchema):
-    # NICETOHAVE: re-enter password for authentication?
 
     class Meta:
         model = User
@@ -45,9 +43,8 @@ class UserPatchInput(ModelSchema):
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
-    # NOTE: do we need check_fields for first/last name?
-    # We need check_fields=False to allow these because we are inhereting
-    # these fields from a parent model:
+    # We need check_fields=False to allow these because we are accessing
+    # these fields through its model:
     @validator('first_name', pre=True, check_fields=False)
     def check_first_name(cls, value):
         """If first_name is sent as an empty string, set it to None."""
@@ -73,7 +70,7 @@ class UserPatchInput(ModelSchema):
     def check_missing_or_empty_data(self):
         """Check that request body contains some data to patch.
 
-        Return values or raise ValueError.
+        Returns self or raise EmptyPatchRequestException.
         """
 
         patch_data = self.dict(exclude_none=True)
@@ -84,8 +81,6 @@ class UserPatchInput(ModelSchema):
             )
 
         return self
-
-
 
 
 ## FAVORITES SCHEMAS###
