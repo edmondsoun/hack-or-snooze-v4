@@ -1,6 +1,8 @@
 from ninja import Schema
 
 
+# Generic output schema for error message JSON returned by API routes:
+
 class Unauthorized(Schema):
     detail: str
 
