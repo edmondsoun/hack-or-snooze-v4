@@ -1,14 +1,17 @@
 import re
 from typing import List
 from typing_extensions import Annotated
-from pydantic import validator, StringConstraints
+from pydantic import validator, model_validator, StringConstraints
 
 from ninja import ModelSchema, Schema
 
 from .models import User
 from stories.schemas import StorySchema
 
-from users.exceptions import InvalidUsernameException
+from users.exceptions import (
+    InvalidUsernameException,
+    EmptyPatchRequestException,
+)
 
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
 ALPHANUMERIC_STRING_PATTERN = re.compile('^[0-9a-zA-Z]*$')
@@ -42,6 +45,7 @@ class UserPatchInput(ModelSchema):
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
+    # NOTE: do we need check_fields for first/last name?
     # We need check_fields=False to allow these because we are inhereting
     # these fields from a parent model:
     @validator('first_name', pre=True, check_fields=False)
@@ -65,6 +69,24 @@ class UserPatchInput(ModelSchema):
             return None
         return value
 
+    @model_validator(mode="after")
+    def check_missing_or_empty_data(self):
+        """Check that request body contains some data to patch.
+
+        Return values or raise ValueError.
+        """
+
+        patch_data = self.dict(exclude_none=True)
+
+        if len(patch_data) == 0:
+            raise EmptyPatchRequestException(
+                "Patch body empty. Must send at least one non-empty field."
+            )
+
+        return self
+
+
+
 
 ## FAVORITES SCHEMAS###
 
@@ -80,13 +102,6 @@ class FavoriteDeleteInput(Schema):
 
 
 class SignupInput(ModelSchema):
-    # TODO: Change how this is displayed in the docs OR see if we can default to
-    # "Schema" display instead of "Example Value":
-    # username: Annotated[
-    #     str,
-    #     StringConstraints(pattern=ALPHANUMERIC_STRING_PATTERN)
-    # ]
-
     class Meta:
         model = User
         fields = ['username', 'password', 'first_name', 'last_name']
@@ -96,13 +111,10 @@ class SignupInput(ModelSchema):
 
     @validator('username', pre=True, check_fields=False)
     def check_username(cls, value):
-        """If username does not conform to ALPHANUMERIC String"""
-        # test that incoming value meets regex constraint
+        """Check username against regex pattern for alphanumeric string."""
         if not ALPHANUMERIC_STRING_PATTERN.match(value):
-            raise InvalidUsernameException("testing custom exception validator")
+            raise InvalidUsernameException("Username must be alphanumeric.")
         return value
-        # if it doesnot throw error
-        # if it does, return value
 
 
 class LoginInput(ModelSchema):

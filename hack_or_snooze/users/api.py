@@ -199,11 +199,6 @@ def update_user(request, username: str, data: UserPatchInput):
     # was provided by the user:
     patch_data = data.dict(exclude_unset=True, exclude_none=True)
 
-    # TODO: better to have this as a validator?
-    # if user sent empty request body, provide helpful feedback:
-    if len(patch_data) == 0:
-        return 400, {"error": "No data provided to patch."}
-
     user = get_object_or_404(User, username=username)
 
     updated_user = user.update(patch_data)

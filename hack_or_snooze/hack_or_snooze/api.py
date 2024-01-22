@@ -3,12 +3,12 @@ from ninja import NinjaAPI
 from stories.api import router as stories_router
 from users.api import router as users_router
 
-from users.exceptions import InvalidUsernameException
+from users.exceptions import (
+    InvalidUsernameException,
+    EmptyPatchRequestException,
+)
 
 api = NinjaAPI()
-
-# STAFFNOTE: it's possible to add middleware-style auth to all operations
-# declared below! investigate this further down the line:
 
 
 api.add_router("/users/", users_router)
@@ -19,6 +19,15 @@ api.add_router("/stories/", stories_router)
 def on_invalid_username(request, exc):
     return api.create_response(
         request,
-        {"detail": "Invalid username"},
+        {"detail": exc.message},
         status=401
+    )
+
+
+@api.exception_handler(EmptyPatchRequestException)
+def on_empty_patch_request(request, exc):
+    return api.create_response(
+        request,
+        {"detail": exc.message},
+        status=400
     )
