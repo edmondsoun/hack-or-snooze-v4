@@ -1,9 +1,8 @@
 import factory
 import datetime
 
-# from factory import LazyAttribute
-
 FACTORY_USER_DEFAULT_PASSWORD = "password"
+
 
 class UserFactory(factory.django.DjangoModelFactory):
     """Factory Class for Users"""
@@ -39,10 +38,3 @@ class UserFactory(factory.django.DjangoModelFactory):
     # Just invoke the intended factory and pass in as a tuple the items you want
     # to add:
     # UserFactory.create(stories=(story1, story2, story3))
-
-    @factory.post_generation
-    def add_favorites(self, create, extracted, **kwargs):
-        if not create or not extracted:
-            return
-
-        self.favorites.add(*extracted)
