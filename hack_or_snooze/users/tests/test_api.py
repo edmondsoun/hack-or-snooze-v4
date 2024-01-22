@@ -1,18 +1,10 @@
 import json
 
 from django.test import TestCase
+from django.contrib.auth.hashers import check_password
 
-# from django.db.utils import IntegrityError
-# from django.core.exceptions import ValidationError, ObjectDoesNotExist
-
-# from ninja.errors import AuthenticationError
-
-# from users.models import User
 from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
-# NOTE: do we want to use AUTH_KEY constant or hardcode string "token" in tests?
 from users.auth_utils import generate_token, AUTH_KEY
-# from users.schemas import SignupInput, LoginInput
-
 from stories.factories import StoryFactory
 
 
@@ -590,7 +582,6 @@ class APIUserPatchTestCase(TestCase):
             }
         )
 
-    # TODO: may want to simplify or remove this test once .update is unittested
     def test_patch_user_can_reauthenticate_with_patched_password(self):
         """This test is to ensure a patched password is re-hashed and stored
         correctly, such that a user can re-authenticate with the new
@@ -641,6 +632,117 @@ class APIUserPatchTestCase(TestCase):
                     "username": "user",
                     "first_name": "userFirst",
                     "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_patch_user_does_not_patch_empty_first_name(self):
+        """TODO:"""
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "userFirst",
+                    "last_name": "newLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_patch_user_does_not_patch_empty_last_name(self):
+        """TODO:"""
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "new_password",
+                "first_name": "newFirst",
+                "last_name": ""
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "newFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_patch_user_does_not_patch_empty_password(self):
+        """TODO:"""
+
+        response = self.client.patch(
+            '/api/users/user',
+            data=json.dumps({
+                "password": "",
+                "first_name": "newFirst",
+                "last_name": "newLast"
+            }),
+            headers={AUTH_KEY: self.user_token},
+            content_type="application/json"
+        )
+
+        # Assert we receive the correct response:
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "newFirst",
+                    "last_name": "newLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+        # Confirm we can log back in with the old password:
+        login_response = self.client.post(
+            '/api/users/login',
+            data=json.dumps({
+                "username": self.user.username,
+                "password": FACTORY_USER_DEFAULT_PASSWORD,
+            }),
+            content_type="application/json"
+        )
+
+        self.assertEqual(login_response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "newFirst",
+                    "last_name": "newLast",
                     "date_joined": "2020-01-01T00:00:00Z"
                 }
             }
@@ -820,28 +922,6 @@ class APIUserPatchTestCase(TestCase):
             response.content,
             {
                 "error": "Must provide data to patch."
-            }
-        )
-
-    # FIXME: test fails right now; this is intentional.
-    # TODO: rename/refactor once new validators are in place.
-    def test_patch_user_fail_patch_data_contains_empty_strings(self):
-        response = self.client.patch(
-            '/api/users/user',
-            data=json.dumps({
-                "password": "new_password",
-                "first_name": "",
-                "last_name": "",
-            }),
-            headers={AUTH_KEY: self.user_token},
-            content_type="application/json"
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "error": "Provided fields cannot be empty strings."
             }
         )
 
