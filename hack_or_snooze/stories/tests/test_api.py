@@ -33,13 +33,7 @@ class APIStoriesPostTestCase(TestCase):
         cls.user2_token = generate_token(cls.user_2.username)
         cls.staff_user_token = generate_token(cls.staff_user.username)
 
-    def setUp(self):
-        # clear up the stories on each user before we proceed to next test
-        APIStoriesPostTestCase.user.stories.all().delete()
-        APIStoriesPostTestCase.user_2.stories.all().delete()
-        APIStoriesPostTestCase.staff_user.stories.all().delete()
-
-        self.valid_data = {
+        cls.valid_data = {
             "author": "post_test_author",
             "title": "post_test_title",
             "url": "post_test_url"

@@ -157,8 +157,6 @@ class APIAuthTestCase(TestCase):
             content_type="application/json"
         )
 
-        # FIXME: this needs to have its response updated to match new approach
-        # to validation:
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(
             response.content,
@@ -293,18 +291,15 @@ class APIAuthTestCase(TestCase):
 class APIUserGetTestCase(TestCase):
     """Test GET /users/{username} endpoint."""
 
-    def setUp(self):
-        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
-        # tokens get regenerated every time:
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        cls.user_2 = UserFactory(username="user2")
+        cls.staff_user = UserFactory(username="staffUser", is_staff=True)
 
-        self.user = UserFactory()
-        self.user_2 = UserFactory(username="user2")
-
-        self.staff_user = UserFactory(username="staffUser", is_staff=True)
-
-        self.user_token = generate_token(self.user.username)
-        self.user2_token = generate_token(self.user_2.username)
-        self.staff_user_token = generate_token(self.staff_user.username)
+        cls.user_token = generate_token(cls.user.username)
+        cls.user2_token = generate_token(cls.user_2.username)
+        cls.staff_user_token = generate_token(cls.staff_user.username)
 
     def test_get_user_ok_as_self(self):
         """Test that a user can get their own user information with a valid
@@ -447,16 +442,15 @@ class APIUserGetTestCase(TestCase):
 class APIUserPatchTestCase(TestCase):
     """Test PATCH /users/{username} endpoint."""
 
-    def setUp(self):
-        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
-        # tokens get regenerated every time:
-        self.user = UserFactory()
-        self.user_2 = UserFactory(username="user2")
-        self.staff_user = UserFactory(username="staffUser", is_staff=True)
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        cls.user_2 = UserFactory(username="user2")
+        cls.staff_user = UserFactory(username="staffUser", is_staff=True)
 
-        self.user_token = generate_token(self.user.username)
-        self.user2_token = generate_token(self.user_2.username)
-        self.staff_user_token = generate_token(self.staff_user.username)
+        cls.user_token = generate_token(cls.user.username)
+        cls.user2_token = generate_token(cls.user_2.username)
+        cls.staff_user_token = generate_token(cls.staff_user.username)
 
     def test_patch_user_ok_all_fields_as_self(self):
 
@@ -888,8 +882,6 @@ class APIUserPatchTestCase(TestCase):
             }
         )
 
-    # FIXME: test fails right now; this is intentional.
-    # TODO: rename/refactor once new validators are in place:
     def test_patch_user_fail_empty_body(self):
         response = self.client.patch(
             '/api/users/user',
@@ -910,19 +902,18 @@ class APIUserPatchTestCase(TestCase):
 class APIFavoritePostTestCase(TestCase):
     """Test POST /user/{username}/favorites endpoint."""
 
-    def setUp(self):
-        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
-        # tokens get regenerated every time:
-        self.user = UserFactory()
-        self.user_2 = UserFactory(username="user2")
-        self.staff_user = UserFactory(username="staffUser", is_staff=True)
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        cls.user_2 = UserFactory(username="user2")
+        cls.staff_user = UserFactory(username="staffUser", is_staff=True)
 
         # by default, a story created by StoryFactory was posted by "user":
-        self.story = StoryFactory()
+        cls.story = StoryFactory()
 
-        self.user_token = generate_token(self.user.username)
-        self.user2_token = generate_token(self.user_2.username)
-        self.staff_user_token = generate_token(self.staff_user.username)
+        cls.user_token = generate_token(cls.user.username)
+        cls.user2_token = generate_token(cls.user_2.username)
+        cls.staff_user_token = generate_token(cls.staff_user.username)
 
     def test_add_favorite_ok_as_self(self):
 
@@ -1237,22 +1228,21 @@ class APIFavoritePostTestCase(TestCase):
 class APIFavoriteDeleteTestCase(TestCase):
     """Test DELETE /user/{username}/favorites endpoint."""
 
-    def setUp(self):
-        # FIXME: may want to move this to beforeAll (setUpTestData), otherwise
-        # tokens get regenerated every time:
-        self.user = UserFactory()
-        self.user_2 = UserFactory(username="user2")
-        self.staff_user = UserFactory(username="staffUser", is_staff=True)
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        cls.user_2 = UserFactory(username="user2")
+        cls.staff_user = UserFactory(username="staffUser", is_staff=True)
 
         # by default, a story created by StoryFactory was posted by "user":
-        self.story = StoryFactory()
+        cls.story = StoryFactory()
 
         # pre-emptively add this story to user_2's favorites:
-        self.user_2.favorites.add(self.story)
+        cls.user_2.favorites.add(cls.story)
 
-        self.user_token = generate_token(self.user.username)
-        self.user2_token = generate_token(self.user_2.username)
-        self.staff_user_token = generate_token(self.staff_user.username)
+        cls.user_token = generate_token(cls.user.username)
+        cls.user2_token = generate_token(cls.user_2.username)
+        cls.staff_user_token = generate_token(cls.staff_user.username)
 
     def test_delete_favorite_ok_as_self(self):
 
