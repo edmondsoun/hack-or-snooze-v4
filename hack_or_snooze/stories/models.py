@@ -7,7 +7,7 @@ from model_utils.models import TimeStampedModel
 
 
 def generate_uuid():
-    """Generate a dynamic UUID to use for story IDs."""
+    """Return a stringified UUID to use for story IDs."""
     return str(uuid.uuid4())
 
 class Story(TimeStampedModel, models.Model):
@@ -35,7 +35,7 @@ class Story(TimeStampedModel, models.Model):
     )
 
     title = models.CharField(
-        max_length=200
+        max_length=200,
     )
 
     url = models.URLField()

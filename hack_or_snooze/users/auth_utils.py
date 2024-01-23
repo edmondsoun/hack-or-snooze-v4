@@ -1,8 +1,8 @@
 from hashlib import md5
 
-from ninja.security import APIKeyHeader
-
 from django.core.exceptions import ObjectDoesNotExist
+
+from ninja.security import APIKeyHeader
 
 from .models import User
 
@@ -34,15 +34,18 @@ class ApiKey(APIKeyHeader):
 
         try:
             user = User.objects.get(username=username)
-
         except ObjectDoesNotExist:
             return None
 
         return user
 
 
+# Instantiate token_header to use in API routes:
 token_header = ApiKey()
 
+
+###############################################################################
+# Helper functions to generate and validate tokens
 
 # Author's note: these auth functions are for didactic purposes only. Never do
 # this in real life!
@@ -84,11 +87,16 @@ def check_token(token):
     Re-hash username and check against user-submitted token.
 
     Returns a boolean.
+
+    EX:
+    "fluffy:ce7bcda695c3" -> True
+    "bad::token" -> False
+    no header (token == None) -> False
     """
 
     try:
         username, hash = token.split(":")
-    # A malformed username will raise a ValueError
+    # A malformed token will raise a ValueError
     # A missing header will raise an AttributeError
     except (ValueError, AttributeError):
         return False

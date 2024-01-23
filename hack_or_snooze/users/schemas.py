@@ -1,24 +1,27 @@
 import re
 from typing import List
+
 from pydantic import validator, model_validator
 
 from ninja import ModelSchema, Schema
 
-from .models import User
-from stories.schemas import StorySchema
-
-from users.exceptions import (
+from hack_or_snooze.exceptions import (
     InvalidUsernameException,
     EmptyPatchRequestException,
 )
+from hack_or_snooze.settings import FORBID_EXTRA_FIELDS_KEYWORD
+from stories.schemas import StorySchema
 
-FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
+from .models import User
+
 ALPHANUMERIC_STRING_PATTERN = re.compile('^[0-9a-zA-Z]*$')
 
-### USERS SCHEMAS###
 
+### USERS SCHEMAS ###
 
 class UserSchema(ModelSchema):
+    """User Schema"""
+
     stories: List[StorySchema]
     favorites: List[StorySchema]
 
@@ -30,10 +33,13 @@ class UserSchema(ModelSchema):
 
 
 class UserOutput(Schema):
+    """Schema for user output."""
+
     user: UserSchema
 
 
 class UserPatchInput(ModelSchema):
+    """Schema for PATCH /users/{username} response body"""
 
     class Meta:
         model = User
@@ -43,25 +49,28 @@ class UserPatchInput(ModelSchema):
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
-    # We need check_fields=False to allow these because we are accessing
-    # these fields through its model:
+    # We need check_fields=False because we are accessing these fields through
+    # its model:
     @validator('first_name', pre=True, check_fields=False)
     def check_first_name(cls, value):
-        """If first_name is sent as an empty string, set it to None."""
+        """If first_name is sent as an empty string, set it to None.
+        Otherwise, return original value."""
         if value == "":
             return None
         return value
 
     @validator('last_name', pre=True, check_fields=False)
     def check_last_name(cls, value):
-        """If last_name is sent as an empty string, set it to None."""
+        """If last_name is sent as an empty string, set it to None.
+        Otherwise, return original value."""
         if value == "":
             return None
         return value
 
     @validator('password', pre=True, check_fields=False)
     def check_password(cls, value):
-        """If password is sent as an empty string, set it to None."""
+        """If password is sent as an empty string, set it to None.
+        Otherwise, return original value."""
         if value == "":
             return None
         return value
@@ -70,7 +79,7 @@ class UserPatchInput(ModelSchema):
     def check_missing_or_empty_data(self):
         """Check that request body contains some data to patch.
 
-        Returns self or raise EmptyPatchRequestException.
+        Returns self or raises EmptyPatchRequestException.
         """
 
         patch_data = self.dict(exclude_none=True)
@@ -83,20 +92,25 @@ class UserPatchInput(ModelSchema):
         return self
 
 
-## FAVORITES SCHEMAS###
+### FAVORITES SCHEMAS ###
 
 class FavoritePostInput(Schema):
+    """Schema for POST /users/{username}/favorites response body"""
+
     story_id: str
 
 
 class FavoriteDeleteInput(Schema):
+    """Schema for DELETE /users/{username}/favorites response body"""
+
     story_id: str
 
 
-### AUTH SCHEMAS###
-
+### AUTH SCHEMAS ###
 
 class SignupInput(ModelSchema):
+    """Schema for POST /signup request body"""
+
     class Meta:
         model = User
         fields = ['username', 'password', 'first_name', 'last_name']
@@ -106,13 +120,18 @@ class SignupInput(ModelSchema):
 
     @validator('username', pre=True, check_fields=False)
     def check_username(cls, value):
-        """Check username against regex pattern for alphanumeric string."""
+        """Check username against regex pattern for alphanumeric string.
+
+        Returns original value or raises InvalidUsernameException."""
+
         if not ALPHANUMERIC_STRING_PATTERN.match(value):
             raise InvalidUsernameException("Username must be alphanumeric.")
         return value
 
 
 class LoginInput(ModelSchema):
+    """Schema for POST /login request body"""
+
     class Meta:
         model = User
         fields = ['username', 'password']
@@ -122,9 +141,6 @@ class LoginInput(ModelSchema):
 
 
 class AuthOutput(Schema):
+    """Schema for auth routes response."""
     token: str
     user: UserSchema
-
-
-class DuplicateUser(Schema):
-    detail: str

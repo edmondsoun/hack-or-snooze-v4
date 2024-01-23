@@ -2,7 +2,6 @@ from django.test import TestCase
 
 from users.models import User
 from users.factories import UserFactory
-
 from users.auth_utils import generate_token, generate_hash, check_token, ApiKey
 
 # Pass empty dictionary to simulate request object:
@@ -68,6 +67,8 @@ class ApiKeyTestCase(TestCase):
 
 
 class AuthUtilsTestCase(TestCase):
+    """Tests for auth helper functions."""
+
     def test_generate_token_ok(self):
         """Test conductor function responsible for formatting token string."""
 

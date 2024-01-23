@@ -11,7 +11,6 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = 'users.User'
         django_get_or_create = ('username', )
 
-    # need to camel case because "_" is prohibited in usernames by our schema
     username = "user"
     password = factory.PostGenerationMethodCall(
         'set_password', FACTORY_USER_DEFAULT_PASSWORD
@@ -22,6 +21,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         2020,1,1,0,0,0,0,
         tzinfo=datetime.timezone.utc
     )
+
     # We will need this if we want to generate a user with pre-generated
     # favorites
     # favorites = factory.SubFactory(StoryFactory)

@@ -5,16 +5,10 @@ from ninja.errors import AuthenticationError
 
 from stories.models import Story
 
-# NICETOHAVE: remove email from the model since we will not
-# be using it
-
 
 class User(AbstractUser):
-    """User model. Currently draws from AbstractUser with no additional
-    columns."""
+    """User model."""
 
-    # NICETOHAVE: model should include DB constraints on username pattern to
-    # mirror schema validation?
     username = models.CharField(
         primary_key=True,
         max_length=150,
@@ -35,7 +29,10 @@ class User(AbstractUser):
         null=False,
     )
 
-    favorites = models.ManyToManyField(Story, related_name="favorited_by")
+    favorites = models.ManyToManyField(
+        Story,
+        related_name="favorited_by",
+    )
 
     @classmethod
     def signup(cls, user_data):
@@ -43,7 +40,8 @@ class User(AbstractUser):
 
         Takes an instance of the SignupInput schema.
 
-        Returns user instance or raises IntegrityError on duplicate username."""
+        Returns user instance or raises IntegrityError on duplicate username.
+        """
 
         user = cls.objects.create(
             username=user_data.username,
@@ -62,16 +60,16 @@ class User(AbstractUser):
 
         Takes an instance of the LoginInput schema.
 
-        Returns user instance on success
+        Returns user instance on success.
 
-        Raises error caught in view function if credentials are incorrect:
+        Raises error if credentials are incorrect:
             - AuthenticationError on check_password fail
-            - ObjectDoesNotExist on non-existant username
+            - ObjectDoesNotExist on nonexistent username
         """
 
         user = cls.objects.get(username=user_data.username)
 
-        if user.check_password(user_data.password):
+        if user.check_password(user_data.password) is True:
             return user
         else:
             raise AuthenticationError("Unauthorized")
@@ -79,8 +77,8 @@ class User(AbstractUser):
     def update(self, patch_data):
         """Update user record and return updated user instance."""
 
-        # FIXME: Ask Joel: Is it okay to be using setattr here, given that it is acting
-        # on an instance from Djangos ORM. Is there a way *from* the ORM
+        # FIXME: Ask Joel: Is it okay to be using Python's setattr here? Are
+        # there any unintuitive downsides, and/or is there a way *from* the ORM
         # to do this?
         for field, value in patch_data.items():
             if (field == 'password'):

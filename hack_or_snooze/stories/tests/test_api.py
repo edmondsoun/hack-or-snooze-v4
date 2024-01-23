@@ -3,9 +3,10 @@ import json
 from django.test import TestCase
 
 from users.factories import UserFactory
-from users.auth_utils import generate_token, AUTH_KEY
+from users.auth_utils import generate_token
 from stories.factories import StoryFactory
 
+AUTH_KEY = 'token'
 EMPTY_TOKEN_VALUE = ''
 MALFORMED_TOKEN_VALUE = 'malformed::token'
 INVALID_TOKEN_VALUE = 'user:abcdef123456'

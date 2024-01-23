@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-
 from stories.factories import StoryFactory
 
 

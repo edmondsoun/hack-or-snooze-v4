@@ -132,3 +132,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # case it comes back:
 
 # APPEND_SLASH = False
+
+#######################################
+# Django Ninja configuration keywords
+
+FORBID_EXTRA_FIELDS_KEYWORD = "forbid"

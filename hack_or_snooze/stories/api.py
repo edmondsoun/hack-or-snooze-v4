@@ -2,18 +2,18 @@ from django.shortcuts import get_object_or_404
 
 from ninja import Router
 
-from .schemas import (StoryPostInput,
-                      StoryPostOutput,
-                      StoryGetAllOutput,
-                      StoryGetOutput,
-                      StoryDeleteOutput
-                      )
 from hack_or_snooze.error_schemas import Unauthorized
-
-from .models import Story
 
 from users.auth_utils import token_header
 
+from .models import Story
+from .schemas import (
+    StoryPostInput,
+    StoryPostOutput,
+    StoryGetAllOutput,
+    StoryGetOutput,
+    StoryDeleteOutput,
+)
 
 router = Router()
 
@@ -21,7 +21,8 @@ router = Router()
 @router.post(
     '/',
     response=StoryPostOutput,
-    summary="PLACEHOLDER",
+    summary="SUMM_PLACEHOLDER",
+    description="DESC_PLACEHOLDER",
     auth=token_header
 )
 def create_story(request, data: StoryPostInput):
@@ -44,17 +45,19 @@ def create_story(request, data: StoryPostInput):
     Authorization: all users
     """
 
-    user = request.auth
+    curr_user = request.auth
     story_data = data.dict()
 
-    story = Story.objects.create(user=user, **story_data)
+    story = Story.objects.create(user=curr_user, **story_data)
 
     return {"story": story}
 
 
 @router.get(
     '/',
-    response=StoryGetAllOutput
+    response=StoryGetAllOutput,
+    summary="SUMM_PLACEHOLDER",
+    description="DESC_PLACEHOLDER"
 )
 def get_stories(request):
     """Get all stories.
@@ -84,8 +87,10 @@ def get_stories(request):
 
 
 @router.get(
-    '/{story_id}',
-    response=StoryGetOutput
+    '/{str:story_id}',
+    response=StoryGetOutput,
+    summary="SUMM_PLACEHOLDER",
+    description="DESC_PLACEHOLDER"
 )
 def get_story(request, story_id: str):
     """Get story by ID.
@@ -113,9 +118,11 @@ def get_story(request, story_id: str):
 
 
 @router.delete(
-    '/{story_id}',
+    '/{str:story_id}',
     response={200: StoryDeleteOutput, 401: Unauthorized},
-    auth=token_header,
+    summary="SUMM_PLACEHOLDER",
+    description="DESC_PLACEHOLDER",
+    auth=token_header
 )
 def delete_story(request, story_id: str):
     """Delete story by ID.

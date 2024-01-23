@@ -7,7 +7,7 @@ from ninja.errors import AuthenticationError
 
 from users.models import User
 from users.factories import UserFactory
-from users.schemas import SignupInput, LoginInput, UserPatchInput
+from users.schemas import SignupInput, LoginInput
 
 
 class UserModelTestCase(TestCase):
@@ -116,7 +116,7 @@ class UserModelTestCase(TestCase):
         with self.assertRaises(ObjectDoesNotExist):
             User.login(bad_login_data)
 
-    def test_update_ok_no_password(self):
+    def test_update_some_fields_no_password(self):
         patch_data = {
             "first_name": "patch_test_first",
             "last_name": "patch_test_last",
@@ -133,13 +133,13 @@ class UserModelTestCase(TestCase):
             patch_data["last_name"]
         )
 
-    def test_update_ok_with_password(self):
+    def test_update_all_fields_with_password(self):
         patch_data = {
             "first_name": "patch_test_first",
             "last_name": "patch_test_last",
             "password": "patch_test_password"
         }
-        
+
         self.test_user.update(patch_data)
 
         self.assertEqual(

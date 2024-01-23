@@ -1,13 +1,12 @@
 import json
 
 from django.test import TestCase
-from django.contrib.auth.hashers import check_password
 
 from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
-from users.auth_utils import generate_token, AUTH_KEY
+from users.auth_utils import generate_token
 from stories.factories import StoryFactory
 
-
+AUTH_KEY = 'token'
 EMPTY_TOKEN_VALUE = ''
 MALFORMED_TOKEN_VALUE = 'malformed::token'
 INVALID_TOKEN_VALUE = 'user:abcdef123456'
@@ -134,7 +133,7 @@ class APIAuthTestCase(TestCase):
             content_type="application/json"
         )
 
-        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(
             response.content,
             {
@@ -988,6 +987,72 @@ class APIFavoritePostTestCase(TestCase):
             }
         )
 
+    def test_add_favorite_does_not_add_same_favorite_twice(self):
+
+        response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+        add_same_favorite_response = self.client.post(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(add_same_favorite_response.status_code, 200)
+        self.assertJSONEqual(
+            add_same_favorite_response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
     def test_add_favorite_fail_unauthorized_no_token_header(self):
 
         response = self.client.post(
@@ -1079,74 +1144,6 @@ class APIFavoritePostTestCase(TestCase):
             response.content,
             {
                 "detail": "Unauthorized"
-            }
-        )
-
-    def test_add_favorite_fail_does_not_add_same_favorite_twice(self):
-        """NOTE: this will 'silently fail' by merit of the default behavior of
-        Django's ManyToManyField. Should we alter test name/find a way to make
-        this more clear? """
-        response = self.client.post(
-            '/api/users/user2/favorites',
-            data=json.dumps({
-                "story_id": self.story.id
-            }),
-            headers={AUTH_KEY: self.user2_token},
-            content_type="application/json"
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [{
-                        'author': 'test_author',
-                        'created': '2020-01-01T00:00:00Z',
-                        'id': self.story.id,
-                        'modified': '2020-01-01T00:00:00Z',
-                        'title': 'test_title',
-                        'url': 'http://test.com',
-                        'username': 'user'
-                    }],
-                    "username": "user2",
-                    "first_name": "userFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
-
-        add_same_favorite_response = self.client.post(
-            '/api/users/user2/favorites',
-            data=json.dumps({
-                "story_id": self.story.id
-            }),
-            headers={AUTH_KEY: self.user2_token},
-            content_type="application/json"
-        )
-
-        self.assertEqual(add_same_favorite_response.status_code, 200)
-        self.assertJSONEqual(
-            add_same_favorite_response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [{
-                        'author': 'test_author',
-                        'created': '2020-01-01T00:00:00Z',
-                        'id': self.story.id,
-                        'modified': '2020-01-01T00:00:00Z',
-                        'title': 'test_title',
-                        'url': 'http://test.com',
-                        'username': 'user'
-                    }],
-                    "username": "user2",
-                    "first_name": "userFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
             }
         )
 
@@ -1301,6 +1298,91 @@ class APIFavoriteDeleteTestCase(TestCase):
             }
         )
 
+    def test_delete_favorite_does_not_delete_same_favorite_twice(self):
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+        delete_same_favorite_response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": self.story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+
+        self.assertEqual(delete_same_favorite_response.status_code, 200)
+        self.assertJSONEqual(
+            delete_same_favorite_response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
+    def test_delete_favorite_no_effect_on_story_not_in_favorites(self):
+
+        new_story = StoryFactory()
+
+        response = self.client.delete(
+            '/api/users/user2/favorites',
+            data=json.dumps({
+                "story_id": new_story.id
+            }),
+            headers={AUTH_KEY: self.user2_token},
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                "user": {
+                    "stories": [],
+                    "favorites": [{
+                        'author': 'test_author',
+                        'created': '2020-01-01T00:00:00Z',
+                        'id': self.story.id,
+                        'modified': '2020-01-01T00:00:00Z',
+                        'title': 'test_title',
+                        'url': 'http://test.com',
+                        'username': 'user'
+                    }],
+                    "username": "user2",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
+            }
+        )
+
     def test_delete_favorite_fail_unauthorized_no_token_header(self):
 
         response = self.client.delete(
@@ -1395,93 +1477,6 @@ class APIFavoriteDeleteTestCase(TestCase):
             }
         )
 
-    def test_delete_favorite_fail_does_not_delete_same_favorite_twice(self):
-        """NOTE: this will 'silently fail' by merit of the default behavior of
-        Django's ManyToManyField. Should we alter test name/find a way to make
-        this more clear? """
-        response = self.client.delete(
-            '/api/users/user2/favorites',
-            data=json.dumps({
-                "story_id": self.story.id
-            }),
-            headers={AUTH_KEY: self.user2_token},
-            content_type="application/json"
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [],
-                    "username": "user2",
-                    "first_name": "userFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
-
-        delete_same_favorite_response = self.client.delete(
-            '/api/users/user2/favorites',
-            data=json.dumps({
-                "story_id": self.story.id
-            }),
-            headers={AUTH_KEY: self.user2_token},
-            content_type="application/json"
-        )
-
-        self.assertEqual(delete_same_favorite_response.status_code, 200)
-        self.assertJSONEqual(
-            delete_same_favorite_response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [],
-                    "username": "user2",
-                    "first_name": "userFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
-
-    def test_delete_favorite_no_effect_on_story_not_in_favorites(self):
-
-        new_story = StoryFactory()
-
-        response = self.client.delete(
-            '/api/users/user2/favorites',
-            data=json.dumps({
-                "story_id": new_story.id
-            }),
-            headers={AUTH_KEY: self.user2_token},
-            content_type="application/json"
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [{
-                        'author': 'test_author',
-                        'created': '2020-01-01T00:00:00Z',
-                        'id': self.story.id,
-                        'modified': '2020-01-01T00:00:00Z',
-                        'title': 'test_title',
-                        'url': 'http://test.com',
-                        'username': 'user'
-                    }],
-                    "username": "user2",
-                    "first_name": "userFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
-
     def test_delete_favorite_fail_bad_request_nonexistent_user_as_staff(self):
         response = self.client.delete(
             '/api/users/nonexistent/favorites',
@@ -1560,7 +1555,7 @@ class APIFavoriteDeleteTestCase(TestCase):
     # 401 unauthorized if different non-staff user's token (authorization) ✅
     # 404 if user not found w/ staff token ✅
     # 422 if extra fields submitted✅
-    # error if no fields submitted ✅ 
+    # error if no fields submitted ✅
     # error if fields contain blank strings as values ✅
 
     # POST /{username}/favorites

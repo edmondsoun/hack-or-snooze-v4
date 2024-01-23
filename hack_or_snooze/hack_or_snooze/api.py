@@ -3,7 +3,7 @@ from ninja import NinjaAPI
 from stories.api import router as stories_router
 from users.api import router as users_router
 
-from hack_or_snooze.hack_or_snooze.exceptions import (
+from hack_or_snooze.exceptions import (
     InvalidUsernameException,
     EmptyPatchRequestException,
 )
