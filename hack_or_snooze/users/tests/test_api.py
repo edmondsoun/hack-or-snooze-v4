@@ -1179,13 +1179,11 @@ class APIFavoritePostTestCase(TestCase):
             content_type="application/json"
         )
 
-        # TODO: should we try to customize this error message to make it clear
-        # it's the user who isn't found?
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Not Found. User does not exist.'
+                'detail': 'User not found.'
             }
         )
 
@@ -1199,13 +1197,11 @@ class APIFavoritePostTestCase(TestCase):
             content_type="application/json"
         )
 
-        # TODO: should we try to customize this error message to make it clear
-        # it's the story that isn't found?
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Not Found'
+                'detail': 'Story not found.'
             }
         )
 
@@ -1219,13 +1215,11 @@ class APIFavoritePostTestCase(TestCase):
             content_type="application/json"
         )
 
-        # TODO: should we try to customize this error message to make it clear
-        # it's the story that isn't found?
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Not Found'
+                'detail': 'Story not found.'
             }
         )
 
@@ -1498,13 +1492,11 @@ class APIFavoriteDeleteTestCase(TestCase):
             content_type="application/json"
         )
 
-        # TODO: should we try to customize this error message to make it clear
-        # it's the user who isn't found?
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Not Found'
+                'detail': 'User not found.'
             }
         )
 
@@ -1518,13 +1510,11 @@ class APIFavoriteDeleteTestCase(TestCase):
             content_type="application/json"
         )
 
-        # TODO: should we try to customize this error message to make it clear
-        # it's the story that isn't found?
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Not Found'
+                'detail': 'Story not found.'
             }
         )
 
@@ -1538,13 +1528,11 @@ class APIFavoriteDeleteTestCase(TestCase):
             content_type="application/json"
         )
 
-        # TODO: should we try to customize this error message to make it clear
-        # it's the story that isn't found?
         self.assertEqual(response.status_code, 404)
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Not Found'
+                'detail': 'Story not found.'
             }
         )
 

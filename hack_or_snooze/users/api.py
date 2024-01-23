@@ -12,8 +12,12 @@ from .schemas import (UserOutput,
                       SignupInput,
                       LoginInput,
                       AuthOutput,
-                      DuplicateUser)
-from hack_or_snooze.error_schemas import (Unauthorized, BadRequest)
+                      DuplicateUser,)
+from hack_or_snooze.error_schemas import (
+    Unauthorized,
+    BadRequest,
+    ObjectNotFound,
+)
 
 
 from .models import User
@@ -210,7 +214,8 @@ def update_user(request, username: str, data: UserPatchInput):
 
 @router.post(
     '/{str:username}/favorites',
-    response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
+    response={200: UserOutput, 400: BadRequest,
+              401: Unauthorized, 404: ObjectNotFound},
     summary="PLACEHOLDER",
     auth=token_header
 )
@@ -229,11 +234,17 @@ def add_favorite(request, username: str, data: FavoritePostInput):
 
     # this covers the case where the curr_user is staff, but the target user
     # does not exist
-    user = get_object_or_404(User, username=username)
+    try:
+        user = User.objects.get(username=username)
+    except ObjectDoesNotExist:
+        return 404, {"detail": "User not found."}
 
     story_id = data.story_id
 
-    story = get_object_or_404(Story, id=story_id)
+    try:
+        story = Story.objects.get(id=story_id)
+    except ObjectDoesNotExist:
+        return 404, {"detail": "Story not found."}
 
     if story in user.stories.all():
         return 400, {"detail": "Cannot add own user stories to favorites"}
@@ -250,7 +261,8 @@ def add_favorite(request, username: str, data: FavoritePostInput):
 
 @router.delete(
     '/{str:username}/favorites',
-    response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
+    response={200: UserOutput, 400: BadRequest,
+              401: Unauthorized, 404: ObjectNotFound},
     summary="PLACEHOLDER",
     auth=token_header
 )
@@ -269,16 +281,21 @@ def delete_favorite(request, username: str, data: FavoriteDeleteInput):
 
     # this covers the case where the curr_user is staff, but the target user
     # does not exist
-    # FIXME: need way to specify which item was not found in 404 error
-    user = get_object_or_404(User, username=username)
+    try:
+        user = User.objects.get(username=username)
+    except ObjectDoesNotExist:
+        return 404, {"detail": "User not found."}
 
     story_id = data.story_id
 
-    story = get_object_or_404(Story, id=story_id)
+    try:
+        story = Story.objects.get(id=story_id)
+    except ObjectDoesNotExist:
+        return 404, {"detail": "Story not found."}
 
     # FIXME: Ask Joel: if we try to remove a story that isn't in your favorites,
-    # it will still return the user object with the favorite 'removed' with a 
-    # 200 status code. Should this raise an error when the story is not in the 
+    # it will still return the user object with the favorite 'removed' with a
+    # 200 status code. Should this raise an error when the story is not in the
     # user's favorites
     user.favorites.remove(story)
 

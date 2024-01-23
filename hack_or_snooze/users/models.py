@@ -79,7 +79,7 @@ class User(AbstractUser):
     def update(self, patch_data):
         """Update user record and return updated user instance."""
 
-        # FIXME: Is it okay to be using setattr here, given that it is acting
+        # FIXME: Ask Joel: Is it okay to be using setattr here, given that it is acting
         # on an instance from Djangos ORM. Is there a way *from* the ORM
         # to do this?
         for field, value in patch_data.items():

@@ -7,3 +7,7 @@ class Unauthorized(Schema):
 
 class BadRequest(Schema):
     detail: str
+
+
+class ObjectNotFound(Schema):
+    detail: str
