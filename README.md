@@ -15,8 +15,13 @@
 - custom error messages for endpoints where user or story could raise 404
 - set DB to automatically purge and reset to seed data periodically
 - Seed data for production
+- normalize DELETE stories and favorites endpoints?
 
 # DOCS TODO:
 
 - Update PLACEHOLDER in all routes
 - Clean up formatting of docstring insertion
+
+# NOTES:
+- User login/signup model methods expect an instance of the validation schema to act on, instead of a plain dictionary.
+- A few #FIXME: are left throughout with design questions.
