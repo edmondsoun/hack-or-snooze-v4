@@ -21,7 +21,6 @@ router = Router()
 @router.post(
     '/',
     response=StoryPostOutput,
-    summary="SUMM_PLACEHOLDER",
     description="DESC_PLACEHOLDER",
     auth=token_header
 )
@@ -56,7 +55,6 @@ def create_story(request, data: StoryPostInput):
 @router.get(
     '/',
     response=StoryGetAllOutput,
-    summary="SUMM_PLACEHOLDER",
     description="DESC_PLACEHOLDER"
 )
 def get_stories(request):
@@ -89,7 +87,6 @@ def get_stories(request):
 @router.get(
     '/{str:story_id}',
     response=StoryGetOutput,
-    summary="SUMM_PLACEHOLDER",
     description="DESC_PLACEHOLDER"
 )
 def get_story(request, story_id: str):
@@ -120,7 +117,6 @@ def get_story(request, story_id: str):
 @router.delete(
     '/{str:story_id}',
     response={200: StoryDeleteOutput, 401: Unauthorized},
-    summary="SUMM_PLACEHOLDER",
     description="DESC_PLACEHOLDER",
     auth=token_header
 )

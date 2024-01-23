@@ -33,7 +33,6 @@ router = Router()
     '/signup',
     response={201: AuthOutput, 400: BadRequest},
     # description="DESC_PLACEHOLDER",
-    # summary="SUMMARY_PLACEHOLDER"
 )
 def signup(request, data: SignupInput):
     """
@@ -84,7 +83,6 @@ def signup(request, data: SignupInput):
     '/login',
     response={200: AuthOutput, 401: Unauthorized},
     description="DESC_PLACEHOLDER",
-    summary="SUMMARY_PLACEHOLDER"
 )
 def login(request, data: LoginInput):
     """
@@ -134,7 +132,6 @@ def login(request, data: LoginInput):
     '/{str:username}',
     response={200: UserOutput, 401: Unauthorized},
     description="DESC_PLACEHOLDER",
-    summary="SUMMARY_PLACEHOLDER",
     auth=token_header
 )
 def get_user(request, username: str):
@@ -170,7 +167,6 @@ def get_user(request, username: str):
     '/{str:username}',
     response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
     description="DESC_PLACEHOLDER",
-    summary="SUMMARY_PLACEHOLDER",
     auth=token_header
 )
 def update_user(request, username: str, data: UserPatchInput):
@@ -191,7 +187,6 @@ def update_user(request, username: str, data: UserPatchInput):
     Authentication: token
     Authorization: same user or admin
     """
-
     curr_user = request.auth
 
     if username != curr_user.username and curr_user.is_staff is not True:
@@ -220,7 +215,6 @@ def update_user(request, username: str, data: UserPatchInput):
         404: ObjectNotFound
     },
     description="DESC_PLACEHOLDER",
-    summary="SUMMARY_PLACEHOLDER",
     auth=token_header
 )
 def add_favorite(request, username: str, data: FavoritePostInput):
@@ -270,8 +264,6 @@ def add_favorite(request, username: str, data: FavoritePostInput):
     # calling this again, will NOT duplicate the relationship if it already
     # exists
 
-    # FIXME: Do we want to throw an error if the story is already in their
-    # favorites, or allow this to silently not-duplicate and return a 200?
     user.favorites.add(story)
 
     return {"user": user}
@@ -286,7 +278,6 @@ def add_favorite(request, username: str, data: FavoritePostInput):
         404: ObjectNotFound
     },
     description="DESC_PLACEHOLDER",
-    summary="SUMMARY_PLACEHOLDER",
     auth=token_header
 )
 def delete_favorite(request, username: str, data: FavoriteDeleteInput):
@@ -328,8 +319,6 @@ def delete_favorite(request, username: str, data: FavoriteDeleteInput):
     except ObjectDoesNotExist:
         return 404, {"detail": "Story not found."}
 
-    # FIXME: Do we want to throw an error if the story is already *not* in their
-    # favorites, or allow this to silently not-delete-anything and return a 200?
     user.favorites.remove(story)
 
     return {"user": user}

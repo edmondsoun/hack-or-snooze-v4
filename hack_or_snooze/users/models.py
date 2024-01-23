@@ -14,6 +14,9 @@ class User(AbstractUser):
         max_length=150,
     )
 
+    # TODO: test adding PW field with min_length - how does this play with
+    # existing validators?
+
     # Need to set blank=False, otherwise the ModelSchema from DjangoNinja will
     # interpret these fields as optional in the schema and coerce
     # their value to None if not included on the request:

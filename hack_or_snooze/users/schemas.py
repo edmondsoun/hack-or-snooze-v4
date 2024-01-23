@@ -5,10 +5,7 @@ from pydantic import validator, model_validator
 
 from ninja import ModelSchema, Schema
 
-from hack_or_snooze.exceptions import (
-    InvalidUsernameException,
-    EmptyPatchRequestException,
-)
+from hack_or_snooze.exceptions import InvalidUsernameException
 from hack_or_snooze.settings import FORBID_EXTRA_FIELDS_KEYWORD
 from stories.schemas import StorySchema
 
@@ -49,7 +46,8 @@ class UserPatchInput(ModelSchema):
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
-    # FIXME:
+    # FIXME: Leaving these here for reference while we refactor.
+
     # We need check_fields=False because we are accessing these fields through
     # its model:
     # @validator('first_name', pre=True, check_fields=False)
