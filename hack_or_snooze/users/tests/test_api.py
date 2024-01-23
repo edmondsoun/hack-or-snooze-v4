@@ -138,7 +138,7 @@ class APIAuthTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Username already exists."
+                "detail": "Username already exists."
             }
         )
 
@@ -159,24 +159,11 @@ class APIAuthTestCase(TestCase):
 
         # FIXME: this needs to have its response updated to match new approach
         # to validation:
-        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(
             response.content,
             {
-                "detail": [
-                    {
-                        "type": "string_pattern_mismatch",
-                        "loc": [
-                            "body",
-                            "data",
-                            "username"
-                        ],
-                        "msg": "String should match pattern '^[0-9a-zA-Z]*$'",
-                        "ctx": {
-                            "pattern": "^[0-9a-zA-Z]*$"
-                        }
-                    }
-                ]
+                "detail": "Username must be alphanumeric."
             }
         )
 
@@ -278,7 +265,7 @@ class APIAuthTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Invalid credentials."
+                "detail": "Invalid credentials."
             }
         )
 
@@ -298,7 +285,7 @@ class APIAuthTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Invalid credentials."
+                "detail": "Invalid credentials."
             }
         )
 
@@ -434,13 +421,10 @@ class APIUserGetTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 401)
-        # FIXME: currently the "different user" checks return a slightly
-        # different response than the generic Unauthorized message produced
-        # during schema validation. do we want to normalize these?
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Unauthorized"
+                "detail": "Unauthorized"
             }
         )
 
@@ -845,13 +829,10 @@ class APIUserPatchTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 401)
-        # FIXME: currently the "different user" checks return a slightly
-        # different response than the generic Unauthorized message produced
-        # during schema validation. do we want to normalize these?
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Unauthorized"
+                "detail": "Unauthorized"
             }
         )
 
@@ -921,7 +902,7 @@ class APIUserPatchTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Must provide data to patch."
+                "detail": "Patch body empty. Must send at least one non-empty field."
             }
         )
 
@@ -1098,13 +1079,10 @@ class APIFavoritePostTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 401)
-        # FIXME: currently the "different user" checks return a slightly
-        # different response than the generic Unauthorized message produced
-        # during schema validation. do we want to normalize these?
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Unauthorized"
+                "detail": "Unauthorized"
             }
         )
 
@@ -1191,7 +1169,7 @@ class APIFavoritePostTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'error': 'Cannot add own user stories to favorites'
+                'detail': 'Cannot add own user stories to favorites'
             }
         )
 
@@ -1421,13 +1399,10 @@ class APIFavoriteDeleteTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 401)
-        # FIXME: currently the "different user" checks return a slightly
-        # different response than the generic Unauthorized message produced
-        # during schema validation. do we want to normalize these?
         self.assertJSONEqual(
             response.content,
             {
-                "error": "Unauthorized"
+                "detail": "Unauthorized"
             }
         )
 

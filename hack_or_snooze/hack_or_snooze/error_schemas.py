@@ -2,8 +2,8 @@ from ninja import Schema
 
 
 class Unauthorized(Schema):
-    error: str
+    detail: str
 
 
 class BadRequest(Schema):
-    error: str
+    detail: str

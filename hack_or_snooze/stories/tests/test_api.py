@@ -565,7 +565,7 @@ class APIStoriesDELETETestCase(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertJSONEqual(
             response.content,
-            {"error": "Unauthorized."}
+            {"detail": "Unauthorized."}
         )
 
     def test_delete_story_fails_not_found(self):

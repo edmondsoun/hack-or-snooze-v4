@@ -127,4 +127,4 @@ class AuthOutput(Schema):
 
 
 class DuplicateUser(Schema):
-    error: str
+    detail: str

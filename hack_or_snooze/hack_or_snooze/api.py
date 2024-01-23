@@ -20,7 +20,7 @@ def on_invalid_username(request, exc):
     return api.create_response(
         request,
         {"detail": exc.message},
-        status=401
+        status=400
     )
 
 

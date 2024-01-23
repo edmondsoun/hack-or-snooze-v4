@@ -135,7 +135,7 @@ def delete_story(request, story_id: str):
     story = get_object_or_404(Story, id=story_id)
 
     if story.user.username != curr_user.username and curr_user.is_staff is not True:
-        return 401, {"error": "Unauthorized."}
+        return 401, {"detail": "Unauthorized."}
 
     story.delete()
 
