@@ -6,22 +6,48 @@
 - `request.auth` stores the return value our ApiKey auth class (currently
   "user")
 
-# Final cleanup TODO:
-- normalize all tests to "fails_" instead of "fail_"
-- set up admin to allow quick post/user deletes
-- trailing commas :)
+# POST-CODE REVIEW NOTES
+## DOCS
+- Use docstrings for route descriptions (use RST for formatting)
+- Update name from DjangoNinja at top
+- Add summary of "how to use API" at top
+  - Doesn't need to be a hand-holdy description; just "how to use API"
+    - How do you register
+    - How do you get a token
+    - How do you use that token
 
-# NICETOHAVE:
-- custom error messages for endpoints where user or story could raise 404
-- set DB to automatically purge and reset to seed data periodically
+## USER MODEL
+- Auth: check for built-in methods.
+  - Add contraint to password with minimum length.
+  - Signup: can we use create_user?
+  - Login: can we use the built in method?
+
+## USERS ROUTES
+### AUTH
+- Add a test that shows a hyphen/underscore is valid.
+  - Rename global constant from ALPHANUMERIC... to SLUGIFIED...?
+
+### PATCH
+- Remove validation for empty string entirely
+  - Except for password?
+    - Currently, without our old validation, you can set pw to an empty string *and* successfully re-authenticate.
+  - Need to test and make totally sure they cannot sign *up* with an empty
+    fn/ln.
+
+## FAVORITES
+- Create "Favorites" application
+- Create "Favorites" model and pass this model to User in ManyToManyField?
+  - Need to research this.
+
+- Restructure favorites endpoints. (Don't spend more than a day on this.)
+  - POST /favorites/{username}/{story_id}/favorite
+  - POST /favorites/{username}/{story_id}/unfavorite
+    - Throw bad request error if trying to add an existing favorite
+    - Throw bad request error if trying to delete a favorite that doesn't exist
+      (look in the actual favorites table for the relationship)
+
+
+
+# NICETOHAVE for deployed version:
+- Set DB to automatically purge and reset to seed data periodically
 - Seed data for production
-- normalize DELETE stories and favorites endpoints?
-
-# DOCS TODO:
-
-- Update PLACEHOLDER in all routes
-- Clean up formatting of docstring insertion
-
-# NOTES:
-- User login/signup model methods expect an instance of the validation schema to act on, instead of a plain dictionary.
-- A few #FIXME: are left throughout with design questions.
