@@ -41,9 +41,6 @@ class User(AbstractUser):
     def signup(cls, user_data):
         """Sign up a new user with provided credentials.
 
-        TODO: clever way to import and use SignupInput as the type in the
-        function signature?
-
         Takes an instance of the SignupInput schema.
 
         Returns user instance or raises IntegrityError on duplicate username."""
@@ -63,9 +60,6 @@ class User(AbstractUser):
     def login(cls, user_data):
         """Log in an existing user with provided credentials.
 
-        TODO: clever way to import and use SignupInput as the type in the
-        function signature?
-
         Takes an instance of the LoginInput schema.
 
         Returns user instance on success
@@ -83,12 +77,11 @@ class User(AbstractUser):
             raise AuthenticationError("Unauthorized")
 
     def update(self, patch_data):
-        """Update user record and return updated user instance.
-        #TODO: docstring here"""
+        """Update user record and return updated user instance."""
 
-        # TODO: need a 2nd set of eyes on this, since it was part of a major
-        # bugfix.
-
+        # FIXME: Is it okay to be using setattr here, given that it is acting
+        # on an instance from Djangos ORM. Is there a way *from* the ORM
+        # to do this?
         for field, value in patch_data.items():
             if (field == 'password'):
                 self.set_password(raw_password=patch_data['password'])

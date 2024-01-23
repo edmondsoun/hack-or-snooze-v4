@@ -154,9 +154,9 @@ class UserModelTestCase(TestCase):
             patch_data["password"],
             self.test_user.password
         ))
+
+        #Check that password is not plain-text
         self.assertNotEqual(
             self.test_user.password,
             patch_data["password"]
         )
-
-#TODO: Add test that ensures instance == instance?

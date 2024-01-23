@@ -14,20 +14,20 @@ INVALID_TOKEN_VALUE = 'user:abcdef123456'
 
 
 class APIAuthTestCase(TestCase):
-    def setUp(self):
-        # TODO: investigate why this is outside setup in SIS?
 
-        self.existing_user = UserFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.existing_user = UserFactory()
 
-        self.valid_signup_data = {
+        cls.valid_signup_data = {
             "username": "test",
             "password": "password",
             "first_name": "testFirst",
             "last_name": "testLast"
         }
 
-        self.valid_login_data = {
-            "username": self.existing_user.username,
+        cls.valid_login_data = {
+            "username": cls.existing_user.username,
             "password": FACTORY_USER_DEFAULT_PASSWORD
         }
 
@@ -616,7 +616,9 @@ class APIUserPatchTestCase(TestCase):
         )
 
     def test_patch_user_does_not_patch_empty_first_name(self):
-        """TODO:"""
+        """Test to ensure that a user's first name is left unchanged if the
+        first_name input field is blank IE ("") an empty string"""
+
         response = self.client.patch(
             '/api/users/user',
             data=json.dumps({
@@ -644,7 +646,9 @@ class APIUserPatchTestCase(TestCase):
         )
 
     def test_patch_user_does_not_patch_empty_last_name(self):
-        """TODO:"""
+        """Test to ensure that a user's last name is left unchanged if the
+        last_name input field is blank IE ("") an empty string"""
+
         response = self.client.patch(
             '/api/users/user',
             data=json.dumps({
@@ -672,7 +676,8 @@ class APIUserPatchTestCase(TestCase):
         )
 
     def test_patch_user_does_not_patch_empty_password(self):
-        """TODO:"""
+        """Test to ensure that a user's password is left unchanged if the
+        password input field is blank IE ("") an empty string"""
 
         response = self.client.patch(
             '/api/users/user',
@@ -1180,7 +1185,7 @@ class APIFavoritePostTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Not Found'
+                'detail': 'Not Found. User does not exist.'
             }
         )
 
@@ -1567,8 +1572,8 @@ class APIFavoriteDeleteTestCase(TestCase):
     # 401 unauthorized if different non-staff user's token (authorization) ✅
     # 404 if user not found w/ staff token ✅
     # 422 if extra fields submitted✅
-    # error if no fields submitted ⚠️ - needs validator updates to pass
-    # error if fields contain blank strings as values ⚠️ - needs validator updates to pass
+    # error if no fields submitted ✅ 
+    # error if fields contain blank strings as values ✅
 
     # POST /{username}/favorites
     # works ok w/ user token ✅
