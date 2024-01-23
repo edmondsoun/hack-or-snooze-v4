@@ -269,14 +269,17 @@ def delete_favorite(request, username: str, data: FavoriteDeleteInput):
 
     # this covers the case where the curr_user is staff, but the target user
     # does not exist
+    # FIXME: need way to specify which item was not found in 404 error
     user = get_object_or_404(User, username=username)
 
     story_id = data.story_id
 
     story = get_object_or_404(Story, id=story_id)
 
-    # STAFFNOTE: if you try to remove a story that isn't in your favorites,
-    # there is no negative consequence currently.
+    # FIXME: Ask Joel: if we try to remove a story that isn't in your favorites,
+    # it will still return the user object with the favorite 'removed' with a 
+    # 200 status code. Should this raise an error when the story is not in the 
+    # user's favorites
     user.favorites.remove(story)
 
     return {"user": user}

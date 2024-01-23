@@ -143,7 +143,3 @@ def delete_story(request, story_id: str):
         "deleted": True,
         "id": story_id
     }
-
-
-# STAFFNOTE: Further study includes prompt to allow users to edit stories. Do
-# we actually want this?

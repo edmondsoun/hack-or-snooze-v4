@@ -2,17 +2,8 @@ import json
 
 from django.test import TestCase
 
-# from django.db.utils import IntegrityError
-# from django.core.exceptions import ValidationError, ObjectDoesNotExist
-
-# from ninja.errors import AuthenticationError
-
-# from users.models import User
-from users.factories import UserFactory, FACTORY_USER_DEFAULT_PASSWORD
-# NOTE: do we want to use AUTH_KEY constant or hardcode string "token" in tests?
+from users.factories import UserFactory
 from users.auth_utils import generate_token, AUTH_KEY
-# from users.schemas import SignupInput, LoginInput
-
 from stories.factories import StoryFactory
 
 EMPTY_TOKEN_VALUE = ''
