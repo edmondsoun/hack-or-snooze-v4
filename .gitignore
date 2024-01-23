@@ -1,5 +1,6 @@
 /venv/
 htmlcov/
+./htmlcov
 .coverage
 .coverage.*
 coverage.xml

@@ -25,12 +25,12 @@ def on_invalid_username(request, exc):
         status=400
     )
 
-
-@api.exception_handler(EmptyPatchRequestException)
-def on_empty_patch_request(request, exc):
-    """Custom exception handler for empty patch requests."""
-    return api.create_response(
-        request,
-        {"detail": exc.message},
-        status=400
-    )
+# FIXME:
+# @api.exception_handler(EmptyPatchRequestException)
+# def on_empty_patch_request(request, exc):
+#     """Custom exception handler for empty patch requests."""
+#     return api.create_response(
+#         request,
+#         {"detail": exc.message},
+#         status=400
+#     )

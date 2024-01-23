@@ -34,6 +34,7 @@ class User(AbstractUser):
         related_name="favorited_by",
     )
 
+    #TODO: investigate create_user
     @classmethod
     def signup(cls, user_data):
         """Sign up a new user with provided credentials.
@@ -54,6 +55,7 @@ class User(AbstractUser):
 
         return user
 
+    #TODO: investigate built-in login
     @classmethod
     def login(cls, user_data):
         """Log in an existing user with provided credentials.
@@ -77,9 +79,6 @@ class User(AbstractUser):
     def update(self, patch_data):
         """Update user record and return updated user instance."""
 
-        # FIXME: Ask Joel: Is it okay to be using Python's setattr here? Are
-        # there any unintuitive downsides, and/or is there a way *from* the ORM
-        # to do this?
         for field, value in patch_data.items():
             if (field == 'password'):
                 self.set_password(raw_password=patch_data['password'])

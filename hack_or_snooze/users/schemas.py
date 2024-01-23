@@ -14,7 +14,7 @@ from stories.schemas import StorySchema
 
 from .models import User
 
-ALPHANUMERIC_STRING_PATTERN = re.compile('^[0-9a-zA-Z]*$')
+ALPHANUMERIC_STRING_PATTERN = re.compile('^[0-9a-zA-Z-_]*$')
 
 
 ### USERS SCHEMAS ###
@@ -49,47 +49,48 @@ class UserPatchInput(ModelSchema):
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
+    # FIXME:
     # We need check_fields=False because we are accessing these fields through
     # its model:
-    @validator('first_name', pre=True, check_fields=False)
-    def check_first_name(cls, value):
-        """If first_name is sent as an empty string, set it to None.
-        Otherwise, return original value."""
-        if value == "":
-            return None
-        return value
+    # @validator('first_name', pre=True, check_fields=False)
+    # def check_first_name(cls, value):
+    #     """If first_name is sent as an empty string, set it to None.
+    #     Otherwise, return original value."""
+    #     if value == "":
+    #         return None
+    #     return value
 
-    @validator('last_name', pre=True, check_fields=False)
-    def check_last_name(cls, value):
-        """If last_name is sent as an empty string, set it to None.
-        Otherwise, return original value."""
-        if value == "":
-            return None
-        return value
+    # @validator('last_name', pre=True, check_fields=False)
+    # def check_last_name(cls, value):
+    #     """If last_name is sent as an empty string, set it to None.
+    #     Otherwise, return original value."""
+    #     if value == "":
+    #         return None
+    #     return value
 
-    @validator('password', pre=True, check_fields=False)
-    def check_password(cls, value):
-        """If password is sent as an empty string, set it to None.
-        Otherwise, return original value."""
-        if value == "":
-            return None
-        return value
+    # @validator('password', pre=True, check_fields=False)
+    # def check_password(cls, value):
+    #     """If password is sent as an empty string, set it to None.
+    #     Otherwise, return original value."""
+    #     if value == "":
+    #         return None
+    #     return value
 
-    @model_validator(mode="after")
-    def check_missing_or_empty_data(self):
-        """Check that request body contains some data to patch.
+    # @model_validator(mode="after")
+    # def check_missing_or_empty_data(self):
+    #     """Check that request body contains some data to patch.
 
-        Returns self or raises EmptyPatchRequestException.
-        """
+    #     Returns self or raises EmptyPatchRequestException.
+    #     """
 
-        patch_data = self.dict(exclude_none=True)
+    #     patch_data = self.dict(exclude_none=True)
 
-        if len(patch_data) == 0:
-            raise EmptyPatchRequestException(
-                "Patch body empty. Must send at least one non-empty field."
-            )
+    #     if len(patch_data) == 0:
+    #         raise EmptyPatchRequestException(
+    #             "Patch body empty. Must send at least one non-empty field."
+    #         )
 
-        return self
+    #     return self
 
 
 ### FAVORITES SCHEMAS ###

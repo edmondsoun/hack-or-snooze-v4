@@ -32,12 +32,13 @@ router = Router()
 @router.post(
     '/signup',
     response={201: AuthOutput, 400: BadRequest},
-    description="DESC_PLACEHOLDER",
-    summary="SUMMARY_PLACEHOLDER"
+    # description="DESC_PLACEHOLDER",
+    # summary="SUMMARY_PLACEHOLDER"
 )
 def signup(request, data: SignupInput):
     """
-    Handle user signup. User must send:
+    **Handle** *user* signup. User must send::
+
         {
             "username": "test",
             "password": "password",
@@ -320,6 +321,8 @@ def delete_favorite(request, username: str, data: FavoriteDeleteInput):
 
     story_id = data.story_id
 
+    # TODO: Look in favorites table instead - return error "no favorite for this
+    # user"
     try:
         story = Story.objects.get(id=story_id)
     except ObjectDoesNotExist:
