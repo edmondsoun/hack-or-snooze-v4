@@ -9,8 +9,8 @@
 # POST-CODE REVIEW NOTES
 ## DOCS
 - Use docstrings for route descriptions (use RST for formatting)
-- Update name from DjangoNinja at top
-- Add summary of "how to use API" at top
+- Update name from DjangoNinja at top✅
+- Add summary of "how to use API" at top✅
   - Doesn't need to be a hand-holdy description; just "how to use API"
     - How do you register
     - How do you get a token
