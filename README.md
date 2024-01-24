@@ -19,20 +19,18 @@
 ## USER MODEL
 - Auth: check for built-in methods.
   - Add contraint to password with minimum length.
-  - Signup: can we use create_user?
   - Login: can we use the built in method?
 
 ## USERS ROUTES
 ### AUTH
 - Add a test that shows a hyphen/underscore is valid.
   - Rename global constant from ALPHANUMERIC... to SLUGIFIED...?
+- Need to test and make totally sure they cannot sign *up* with an empty
+    fn/ln.
 
 ### PATCH
 - Remove validation for empty string entirely
-  - Except for password?
-    - Currently, without our old validation, you can set pw to an empty string *and* successfully re-authenticate.
-  - Need to test and make totally sure they cannot sign *up* with an empty
-    fn/ln.
+  - if they really want an empty string it can be an empty string
 
 ## FAVORITES
 - Create "Favorites" application

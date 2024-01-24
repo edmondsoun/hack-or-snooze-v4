@@ -14,6 +14,8 @@ class User(AbstractUser):
         max_length=150,
     )
 
+    # password = models.CharField(_("password"), max_length=128)
+
     # TODO: test adding PW field with min_length - how does this play with
     # existing validators?
 
@@ -37,7 +39,6 @@ class User(AbstractUser):
         related_name="favorited_by",
     )
 
-    #TODO: investigate create_user
     @classmethod
     def signup(cls, user_data):
         """Sign up a new user with provided credentials.
@@ -47,18 +48,18 @@ class User(AbstractUser):
         Returns user instance or raises IntegrityError on duplicate username.
         """
 
-        user = cls.objects.create(
+        user = cls.objects.create_user(
             username=user_data.username,
             first_name=user_data.first_name,
             last_name=user_data.last_name,
+            password=user_data.password
         )
 
-        user.set_password(raw_password=user_data.password)
         user.save()
 
         return user
 
-    #TODO: investigate built-in login
+    # TODO: investigate built-in login
     @classmethod
     def login(cls, user_data):
         """Log in an existing user with provided credentials.

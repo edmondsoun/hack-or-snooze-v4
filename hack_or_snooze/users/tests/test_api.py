@@ -629,6 +629,7 @@ class APIUserPatchTestCase(TestCase):
             content_type="application/json"
         )
 
+
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -706,6 +707,8 @@ class APIUserPatchTestCase(TestCase):
         )
 
         # Confirm we can log back in with the old password:
+        #TODO: Update this, the password CAN change and should now be 
+        # able to log in with the NEW password
         login_response = self.client.post(
             '/api/users/login',
             data=json.dumps({
