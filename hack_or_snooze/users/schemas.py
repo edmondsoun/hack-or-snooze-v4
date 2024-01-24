@@ -46,7 +46,10 @@ class UserPatchInput(ModelSchema):
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
-    # FIXME: Leaving these here for reference while we refactor.
+    # NOTE: Leaving these here for reference while we refactor.
+    # We are intentionally opting-in to less validation so that 
+    # students can get some experience with apis that will literally
+    # do what you ask them to.
 
     # We need check_fields=False because we are accessing these fields through
     # its model:
@@ -117,6 +120,10 @@ class SignupInput(ModelSchema):
     class Config:
         extra = FORBID_EXTRA_FIELDS_KEYWORD
 
+    # NOTE: There is no validator to ensure that user passwords meet a 
+    # minimum length. Consequently, this means that a signup with a "" password
+    # is valid.
+    
     @validator('username', pre=True, check_fields=False)
     def check_username(cls, value):
         """Check username against regex pattern for alphanumeric string.
