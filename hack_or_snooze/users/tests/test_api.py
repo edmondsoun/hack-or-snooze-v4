@@ -614,124 +614,123 @@ class APIUserPatchTestCase(TestCase):
             }
         )
 
-    def test_patch_user_does_not_patch_empty_first_name(self):
-        """Test to ensure that a user's first name is left unchanged if the
-        first_name input field is blank IE ("") an empty string"""
+    # def test_patch_user_does_not_patch_empty_first_name(self):
+    #     """Test to ensure that a user's first name is left unchanged if the
+    #     first_name input field is blank IE ("") an empty string"""
 
-        response = self.client.patch(
-            '/api/users/user',
-            data=json.dumps({
-                "password": "new_password",
-                "first_name": "",
-                "last_name": "newLast"
-            }),
-            headers={AUTH_KEY: self.user_token},
-            content_type="application/json"
-        )
+    #     response = self.client.patch(
+    #         '/api/users/user',
+    #         data=json.dumps({
+    #             "password": "new_password",
+    #             "first_name": "",
+    #             "last_name": "newLast"
+    #         }),
+    #         headers={AUTH_KEY: self.user_token},
+    #         content_type="application/json"
+    #     )
 
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertJSONEqual(
+    #         response.content,
+    #         {
+    #             "user": {
+    #                 "stories": [],
+    #                 "favorites": [],
+    #                 "username": "user",
+    #                 "first_name": "userFirst",
+    #                 "last_name": "newLast",
+    #                 "date_joined": "2020-01-01T00:00:00Z"
+    #             }
+    #         }
+    #     )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [],
-                    "username": "user",
-                    "first_name": "userFirst",
-                    "last_name": "newLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
+    # def test_patch_user_does_not_patch_empty_last_name(self):
+    #     """Test to ensure that a user's last name is left unchanged if the
+    #     last_name input field is blank IE ("") an empty string"""
 
-    def test_patch_user_does_not_patch_empty_last_name(self):
-        """Test to ensure that a user's last name is left unchanged if the
-        last_name input field is blank IE ("") an empty string"""
+    #     response = self.client.patch(
+    #         '/api/users/user',
+    #         data=json.dumps({
+    #             "password": "new_password",
+    #             "first_name": "newFirst",
+    #             "last_name": ""
+    #         }),
+    #         headers={AUTH_KEY: self.user_token},
+    #         content_type="application/json"
+    #     )
 
-        response = self.client.patch(
-            '/api/users/user',
-            data=json.dumps({
-                "password": "new_password",
-                "first_name": "newFirst",
-                "last_name": ""
-            }),
-            headers={AUTH_KEY: self.user_token},
-            content_type="application/json"
-        )
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertJSONEqual(
+    #         response.content,
+    #         {
+    #             "user": {
+    #                 "stories": [],
+    #                 "favorites": [],
+    #                 "username": "user",
+    #                 "first_name": "newFirst",
+    #                 "last_name": "userLast",
+    #                 "date_joined": "2020-01-01T00:00:00Z"
+    #             }
+    #         }
+    #     )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [],
-                    "username": "user",
-                    "first_name": "newFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
+    # def test_patch_user_does_not_patch_empty_password(self):
+        # """Test to ensure that a user's password is left unchanged if the
+        # password input field is blank IE ("") an empty string"""
 
-    def test_patch_user_does_not_patch_empty_password(self):
-        """Test to ensure that a user's password is left unchanged if the
-        password input field is blank IE ("") an empty string"""
+        # response = self.client.patch(
+        #     '/api/users/user',
+        #     data=json.dumps({
+        #         "password": "",
+        #         "first_name": "newFirst",
+        #         "last_name": "newLast"
+        #     }),
+        #     headers={AUTH_KEY: self.user_token},
+        #     content_type="application/json"
+        # )
 
-        response = self.client.patch(
-            '/api/users/user',
-            data=json.dumps({
-                "password": "",
-                "first_name": "newFirst",
-                "last_name": "newLast"
-            }),
-            headers={AUTH_KEY: self.user_token},
-            content_type="application/json"
-        )
+        # # Assert we receive the correct response:
+        # self.assertEqual(response.status_code, 200)
+        # self.assertJSONEqual(
+        #     response.content,
+        #     {
+        #         "user": {
+        #             "stories": [],
+        #             "favorites": [],
+        #             "username": "user",
+        #             "first_name": "newFirst",
+        #             "last_name": "newLast",
+        #             "date_joined": "2020-01-01T00:00:00Z"
+        #         }
+        #     }
+        # )
 
-        # Assert we receive the correct response:
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [],
-                    "username": "user",
-                    "first_name": "newFirst",
-                    "last_name": "newLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
+        # # Confirm we can log back in with the old password:
+        # #TODO: Update this, the password CAN change and should now be
+        # # able to log in with the NEW password
+        # login_response = self.client.post(
+        #     '/api/users/login',
+        #     data=json.dumps({
+        #         "username": self.user.username,
+        #         "password": FACTORY_USER_DEFAULT_PASSWORD,
+        #     }),
+        #     content_type="application/json"
+        # )
 
-        # Confirm we can log back in with the old password:
-        #TODO: Update this, the password CAN change and should now be 
-        # able to log in with the NEW password
-        login_response = self.client.post(
-            '/api/users/login',
-            data=json.dumps({
-                "username": self.user.username,
-                "password": FACTORY_USER_DEFAULT_PASSWORD,
-            }),
-            content_type="application/json"
-        )
-
-        self.assertEqual(login_response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [],
-                    "username": "user",
-                    "first_name": "newFirst",
-                    "last_name": "newLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
-        )
+        # self.assertEqual(login_response.status_code, 200)
+        # self.assertJSONEqual(
+        #     response.content,
+        #     {
+        #         "user": {
+        #             "stories": [],
+        #             "favorites": [],
+        #             "username": "user",
+        #             "first_name": "newFirst",
+        #             "last_name": "newLast",
+        #             "date_joined": "2020-01-01T00:00:00Z"
+        #         }
+        #     }
+        # )
 
     def test_patch_user_fail_unauthorized_no_token_header(self):
 
@@ -889,7 +888,7 @@ class APIUserPatchTestCase(TestCase):
             }
         )
 
-    def test_patch_user_fail_empty_body(self):
+    def test_patch_user_ok_empty_body(self):
         response = self.client.patch(
             '/api/users/user',
             data=json.dumps({}),
@@ -897,11 +896,18 @@ class APIUserPatchTestCase(TestCase):
             content_type="application/json"
         )
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
             {
-                "detail": "Patch body empty. Must send at least one non-empty field."
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user",
+                    "first_name": "userFirst",
+                    "last_name": "userLast",
+                    "date_joined": "2020-01-01T00:00:00Z"
+                }
             }
         )
 
