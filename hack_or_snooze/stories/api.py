@@ -27,7 +27,7 @@ def create_story(request, data: StoryPostInput):
     """
     Create a story.
 
-    Returns newly created story:
+    On success, returns newly created story:
 
         {
             "story": {
@@ -42,6 +42,7 @@ def create_story(request, data: StoryPostInput):
         }
 
     **Authentication: token**
+
     **Authorization: all users**
     """
 
@@ -56,17 +57,19 @@ def create_story(request, data: StoryPostInput):
 @router.get(
     '/',
     response=StoryGetAllOutput,
-    description="DESC_PLACEHOLDER"
 )
 def get_stories(request):
-    """Get all stories.
+    """
+    Get all stories.
 
-    Returns list of stories:
+    On success, returns list of stories:
+
         {
             "stories": [Story, Story...]
         }
 
     Where "Story" is:
+
         {
                 "id": "725ff2f9-2cc4-4e29-abab-95b9921f5a6b",
                 "username": "test",
@@ -77,7 +80,7 @@ def get_stories(request):
                 "modified": "2000-01-01T00:00:00Z"
         }
 
-    Authentication: none
+    **Authentication: none**
     """
 
     stories = Story.objects.all()
@@ -88,12 +91,13 @@ def get_stories(request):
 @router.get(
     '/{str:story_id}',
     response=StoryGetOutput,
-    description="DESC_PLACEHOLDER"
 )
 def get_story(request, story_id: str):
-    """Get story by ID.
+    """
+    Get story by ID.
 
-    Returns story data:
+    On success, returns story data:
+
         {
             "story": {
                 "id": "725ff2f9-2cc4-4e29-abab-95b9921f5a6b",
@@ -107,7 +111,7 @@ def get_story(request, story_id: str):
         }
 
 
-    Authentication: none
+    **Authentication: none**
     """
 
     story = get_object_or_404(Story, id=story_id)
@@ -118,20 +122,22 @@ def get_story(request, story_id: str):
 @router.delete(
     '/{str:story_id}',
     response={200: StoryDeleteOutput, 401: Unauthorized},
-    description="DESC_PLACEHOLDER",
     auth=token_header
 )
 def delete_story(request, story_id: str):
-    """Delete story by ID.
+    """
+    Delete story by ID.
 
-    Returns confirmation with ID of deleted story:
+    On success, returns confirmation with ID of deleted story:
+
         {
             "deleted": true,
             "id": "725ff2f9-2cc4-4e29-abab-95b9921f5a6b"
         }
 
-    Authentication: token
-    Authorization: same user or admin
+    **Authentication: token**
+
+    **Authorization: same user or admin**
     """
 
     curr_user = request.auth
