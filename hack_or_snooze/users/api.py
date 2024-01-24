@@ -31,12 +31,11 @@ router = Router()
 
 @router.post(
     '/signup',
-    response={201: AuthOutput, 400: BadRequest},
-    # description="DESC_PLACEHOLDER",
+    response={201: AuthOutput, 400: BadRequest}
 )
 def signup(request, data: SignupInput):
     """
-    **Handle** *user* signup. User must send::
+    Handles user signup. User must send:
 
         {
             "username": "test",
@@ -45,7 +44,8 @@ def signup(request, data: SignupInput):
             "last_name": "Last"
         }
 
-    On success, creates new user and return auth token and user info:
+    On success, creates new user and returns auth token and user info:
+
         {
             "token": "test:098f6bcd4621",
             "user": {
@@ -58,12 +58,13 @@ def signup(request, data: SignupInput):
             }
         }
 
-    On failure for repeat username, return error JSON:
+    On failure for repeat username, returns error JSON:
+
         {
             "detail": "Username already exists."
         }
 
-    Authentication: none
+    **Authentication: none**
     """
 
     try:
@@ -81,18 +82,19 @@ def signup(request, data: SignupInput):
 
 @router.post(
     '/login',
-    response={200: AuthOutput, 401: Unauthorized},
-    description="DESC_PLACEHOLDER",
+    response={200: AuthOutput, 401: Unauthorized}
 )
 def login(request, data: LoginInput):
     """
-    Handle user login. User must send:
+    Handles user login. User must send:
+
         {
             "username":"test",
             "password":"password"
         }
 
-    On success, return auth token and user info:
+    On success, returns auth token and user info:
+
         {
             "token": "test:098f6bcd4621",
             "user": {
@@ -105,12 +107,13 @@ def login(request, data: LoginInput):
             }
         }
 
-    On failure with bad credentials, return error JSON:
+    On failure with bad credentials, returns error JSON:
+
         {
             "detail": "Invalid credentials."
         }
 
-    Authentication: none
+    **Authentication: none**
     """
 
     try:
@@ -131,13 +134,14 @@ def login(request, data: LoginInput):
 @router.get(
     '/{str:username}',
     response={200: UserOutput, 401: Unauthorized},
-    description="DESC_PLACEHOLDER",
     auth=token_header
 )
 def get_user(request, username: str):
-    """Get information about a single user.
+    """
+    Get information about a single user.
 
-    On success, return user info:
+    On success, returns user info:
+
         {
             "user": {
                 "stories": [Story, Story...],
@@ -149,8 +153,9 @@ def get_user(request, username: str):
             }
         }
 
-    Authentication: token
-    Authorization: same user or admin
+    **Authentication: token**
+
+    **Authorization: same user or admin**
     """
 
     curr_user = request.auth
@@ -166,13 +171,14 @@ def get_user(request, username: str):
 @router.patch(
     '/{str:username}',
     response={200: UserOutput, 400: BadRequest, 401: Unauthorized},
-    description="DESC_PLACEHOLDER",
     auth=token_header
 )
 def update_user(request, username: str, data: UserPatchInput):
-    """Update a single user.
+    """
+    Update a single user.
 
-    On success, return user info:
+    On success, returns user info:
+
         {
             "user": {
                 "stories": [Story, Story...],
@@ -184,8 +190,9 @@ def update_user(request, username: str, data: UserPatchInput):
             }
         }
 
-    Authentication: token
-    Authorization: same user or admin
+    **Authentication: token**
+
+    **Authorization: same user or admin**
     """
     curr_user = request.auth
 
@@ -214,13 +221,14 @@ def update_user(request, username: str, data: UserPatchInput):
         401: Unauthorized,
         404: ObjectNotFound
     },
-    description="DESC_PLACEHOLDER",
     auth=token_header
 )
 def add_favorite(request, username: str, data: FavoritePostInput):
-    """Add a story to a user's favorites.
+    """
+    Add a story to a user's favorites.
 
     On success, returns user data with target story added to user.favorites:
+
         {
             "user": {
                 "stories": [Story, Story...],
@@ -232,8 +240,9 @@ def add_favorite(request, username: str, data: FavoritePostInput):
             }
         }
 
-    Authentication: token
-    Authorization: same user or admin
+    **Authentication: token**
+
+    **Authorization: same user or admin**
     """
 
     curr_user = request.auth
@@ -277,13 +286,15 @@ def add_favorite(request, username: str, data: FavoritePostInput):
         401: Unauthorized,
         404: ObjectNotFound
     },
-    description="DESC_PLACEHOLDER",
     auth=token_header
 )
 def delete_favorite(request, username: str, data: FavoriteDeleteInput):
-    """Delete a story from a user's favorites.
+    """
+    Delete a story from a user's favorites.
 
-    On success, returns user data with target story removed from user.favorites:
+    On success, returns user data with target story removed from the user's
+    favorites:
+
         {
             "user": {
                 "stories": [Story, Story...],
@@ -295,8 +306,9 @@ def delete_favorite(request, username: str, data: FavoriteDeleteInput):
             }
         }
 
-    Authentication: token
-    Authorization: same user or admin
+    **Authentication: token**
+
+    **Authorization: same user or admin**
     """
     curr_user = request.auth
 
