@@ -21,13 +21,14 @@ router = Router()
 @router.post(
     '/',
     response=StoryPostOutput,
-    description="DESC_PLACEHOLDER",
     auth=token_header
 )
 def create_story(request, data: StoryPostInput):
-    """Create a story.
+    """
+    Create a story.
 
     Returns newly created story:
+
         {
             "story": {
                 "id": "725ff2f9-2cc4-4e29-abab-95b9921f5a6b",
@@ -40,8 +41,8 @@ def create_story(request, data: StoryPostInput):
             }
         }
 
-    Authentication: token
-    Authorization: all users
+    **Authentication: token**
+    **Authorization: all users**
     """
 
     curr_user = request.auth

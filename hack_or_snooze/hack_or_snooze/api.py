@@ -42,7 +42,7 @@ documentation for usage in these interactive endpoints.
 api = NinjaAPI(
     title="Hack Or Snooze API",
     description=description
-    
+
 )
 
 
