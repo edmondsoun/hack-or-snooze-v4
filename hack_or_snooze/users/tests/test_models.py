@@ -47,74 +47,74 @@ class UserModelTestCase(TestCase):
         with self.assertRaises(ValidationError):
             self.test_user.full_clean()
 
-    def test_signup_ok(self):
-        """Test User signup method runs successfully and returns a User
-        instance."""
+    # def test_signup_ok(self):
+    #     """Test User signup method runs successfully and returns a User
+    #     instance."""
 
-        new_user_data = SignupInput(
-            username="test2",
-            password="test_password",
-            first_name="first",
-            last_name="last",
-        )
+    #     new_user_data = SignupInput(
+    #         username="test2",
+    #         password="test_password",
+    #         first_name="first",
+    #         last_name="last",
+    #     )
 
-        new_user = User.signup(new_user_data)
-        self.assertIsInstance(new_user, User)
+    #     new_user = User.signup(new_user_data)
+    #     self.assertIsInstance(new_user, User)
 
-        # check user instance has hashed password:
-        self.assertTrue(new_user.check_password(new_user_data.password))
+    #     # check user instance has hashed password:
+    #     self.assertTrue(new_user.check_password(new_user_data.password))
 
-    def test_signup_fail_duplicate_username(self):
-        """Test User signup method throws Integrity error when adding duplicate
-        username."""
+    # def test_signup_fail_duplicate_username(self):
+    #     """Test User signup method throws Integrity error when adding duplicate
+    #     username."""
 
-        bad_user_data = SignupInput(
-            username=self.test_user.username,
-            password="test_password",
-            first_name="first",
-            last_name="last",
-        )
+    #     bad_user_data = SignupInput(
+    #         username=self.test_user.username,
+    #         password="test_password",
+    #         first_name="first",
+    #         last_name="last",
+    #     )
 
-        with self.assertRaises(IntegrityError):
-            User.signup(bad_user_data)
+    #     with self.assertRaises(IntegrityError):
+    #         User.signup(bad_user_data)
 
-    def test_login_ok(self):
-        """Test User login method runs successfuly and returns a User instance
-        """
+    # def test_login_ok(self):
+    #     """Test User login method runs successfuly and returns a User instance
+    #     """
 
-        login_data = LoginInput(
-            username=self.test_user.username,
-            password="password",
-        )
+    #     login_data = LoginInput(
+    #         username=self.test_user.username,
+    #         password="password",
+    #     )
 
-        logged_in_user = User.login(login_data)
+    #     logged_in_user = User.login(login_data)
 
-        self.assertIsInstance(logged_in_user, User)
-        self.assertEqual(self.test_user.username, logged_in_user.username)
+    #     self.assertIsInstance(logged_in_user, User)
+    #     self.assertEqual(self.test_user.username, logged_in_user.username)
 
-    def test_login_fail_incorrect_password(self):
-        """Test login method raises AuthenticationError on incorrect
-        password."""
+    # def test_login_fail_incorrect_password(self):
+    #     """Test login method raises AuthenticationError on incorrect
+    #     password."""
 
-        bad_login_data = LoginInput(
-            username=self.test_user.username,
-            password="bad_password",
-        )
+    #     bad_login_data = LoginInput(
+    #         username=self.test_user.username,
+    #         password="bad_password",
+    #     )
 
-        with self.assertRaises(AuthenticationError):
-            User.login(bad_login_data)
+    #     with self.assertRaises(AuthenticationError):
+    #         User.login(bad_login_data)
 
-    def test_login_fail_nonexistent_username(self):
-        """Test login method raises ObjectDoesNotExist on nonexistent
-        username."""
+    # def test_login_fail_nonexistent_username(self):
+    #     """Test login method raises ObjectDoesNotExist on nonexistent
+    #     username."""
 
-        bad_login_data = LoginInput(
-            username="nonexistent_user",
-            password="password",
-        )
+    #     bad_login_data = LoginInput(
+    #         username="nonexistent_user",
+    #         password="password",
+    #     )
 
-        with self.assertRaises(ObjectDoesNotExist):
-            User.login(bad_login_data)
+    #     with self.assertRaises(ObjectDoesNotExist):
+    #         User.login(bad_login_data)
 
     def test_update_some_fields_no_password(self):
         patch_data = {

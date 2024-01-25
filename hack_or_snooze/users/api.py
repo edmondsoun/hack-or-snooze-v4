@@ -1,9 +1,9 @@
-from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
+from django.db import transaction
+from django.contrib.auth import authenticate
 
 from ninja import Router
-from ninja.errors import AuthenticationError
 
 from hack_or_snooze.error_schemas import (
     BadRequest,
@@ -66,11 +66,16 @@ def signup(request, data: SignupInput):
 
     **Authentication: none**
     """
-
-    try:
-        user = User.signup(user_data=data)
-    except IntegrityError:
+    if User.objects.filter(username=data.username).exists():
         return 400, {"detail": "Username already exists."}
+
+    with transaction.atomic():
+        user = User.objects.create_user(
+            username=data.username,
+            first_name=data.first_name,
+            last_name=data.last_name,
+            password=data.password
+        )
 
     token = generate_token(user.username)
 
@@ -116,9 +121,9 @@ def login(request, data: LoginInput):
     **Authentication: none**
     """
 
-    try:
-        user = User.login(user_data=data)
-    except (ObjectDoesNotExist, AuthenticationError):
+    user = authenticate(username=data.username, password=data.password)
+
+    if user is None:
         return 401, {"detail": "Invalid credentials."}
 
     token = generate_token(user.username)
