@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import validator, model_validator
 
-from ninja import ModelSchema, Schema
+from ninja import ModelSchema, Schema, Field
 
 from hack_or_snooze.exceptions import InvalidUsernameException
 from hack_or_snooze.settings import FORBID_EXTRA_FIELDS_KEYWORD
@@ -112,6 +112,10 @@ class FavoriteDeleteInput(Schema):
 
 class SignupInput(ModelSchema):
     """Schema for POST /signup request body"""
+
+    first_name: str = Field(..., min_length=2)
+    last_name: str = Field(..., min_length=2)
+    password: str = Field(..., min_length=5)
 
     class Meta:
         model = User
