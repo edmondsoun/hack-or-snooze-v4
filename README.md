@@ -7,8 +7,8 @@
   "user")
 
 # POST-CODE REVIEW NOTES
-## DOCS
-- Use docstrings for route descriptions (use RST for formatting)
+## DOCS✅
+- Use docstrings for route descriptions (use RST for formatting)✅
 - Update name from DjangoNinja at top✅
 - Add summary of "how to use API" at top✅
   - Doesn't need to be a hand-holdy description; just "how to use API"
@@ -18,8 +18,19 @@
 
 ## USER MODEL
 - Auth: check for built-in methods.
-  - Add contraint to password with minimum length.
+  - Add contraint to password with minimum length.❌
+    - no action needed. App does *not* need to be secure per Joel
   - Login: can we use the built in method?
+    - `login()` in Django will allow us to create a session with the user. We
+      don't need or want to save a session, and as far as I can tell doesn't actually
+      authenticate the user anyways.
+  - Signup: can we use the built in `create_user`❌
+    - after testing, it seems that create_user will not be a great choice since it 
+    does not check if a user already exists before running. In fact, the method will
+    mutate an existing user in this application if one already exists. We could use 
+    `User.objects.get()` and then catch the `ObjectDoesNotExist` error, but this feels
+    very gross to instantiate a new user. The way we have is working and doing mostly
+    the same thing with a more understandable pattern.
 
 ## USERS ROUTES
 ### AUTH
