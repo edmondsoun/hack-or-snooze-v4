@@ -58,6 +58,74 @@ class APIAuthTestCase(TestCase):
             }
         )
 
+    def test_signup_ok_with_hyphen_username(self):
+
+        valid_data = {
+            **self.valid_signup_data,
+            "username": "user-name"
+        }
+
+        response = self.client.post(
+            '/api/users/signup',
+            data=json.dumps(valid_data),
+            content_type="application/json"
+        )
+
+        # get date_joined from response so we don't encounter
+        # issues with differing dates
+        response_json = json.loads(response.content)
+        response_date_joined = response_json["user"]["date_joined"]
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response_json,
+            {
+                AUTH_KEY: "user-name:f8e156340829",
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user-name",
+                    "first_name": "testFirst",
+                    "last_name": "testLast",
+                    "date_joined": response_date_joined
+                }
+            }
+        )
+
+    def test_signup_ok_with_underscore_username(self):
+
+        valid_data = {
+            **self.valid_signup_data,
+            "username": "user_name"
+        }
+
+        response = self.client.post(
+            '/api/users/signup',
+            data=json.dumps(valid_data),
+            content_type="application/json"
+        )
+
+        # get date_joined from response so we don't encounter
+        # issues with differing dates
+        response_json = json.loads(response.content)
+        response_date_joined = response_json["user"]["date_joined"]
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response_json,
+            {
+                AUTH_KEY: "user_name:c56f5648d4c0",
+                "user": {
+                    "stories": [],
+                    "favorites": [],
+                    "username": "user_name",
+                    "first_name": "testFirst",
+                    "last_name": "testLast",
+                    "date_joined": response_date_joined
+                }
+            }
+        )
+
     def test_signup_fail_missing_data(self):
 
         invalid_data = {
