@@ -14,11 +14,6 @@ class User(AbstractUser):
         max_length=150,
     )
 
-    # password = models.CharField(_("password"), max_length=128)
-
-    # TODO: test adding PW field with min_length - how does this play with
-    # existing validators?
-
     # Need to set blank=False, otherwise the ModelSchema from DjangoNinja will
     # interpret these fields as optional in the schema and coerce
     # their value to None if not included on the request:
@@ -38,55 +33,6 @@ class User(AbstractUser):
         Story,
         related_name="favorited_by",
     )
-
-    # TODO: remove this
-    # @classmethod
-    # def signup(cls, user_data):
-    #     """Sign up a new user with provided credentials.
-
-    #     Takes an instance of the SignupInput schema.
-
-    #     Returns user instance or raises IntegrityError on duplicate username.
-    #     """
-
-    #     # user = cls.objects.create(
-    #     #     username=user_data.username,
-    #     #     first_name=user_data.first_name,
-    #     #     last_name=user_data.last_name,
-    #     # )
-
-    #     user = cls.objects.create_user(
-    #         username=user_data.username,
-    #         first_name=user_data.first_name,
-    #         last_name=user_data.last_name,
-    #         password=user_data.password
-    #     )
-
-    #     user.set_password(raw_password=user_data.password)
-    #     user.save()
-
-    #     return user
-
-    # TODO: remove this
-    # @classmethod
-    # def login(cls, user_data):
-    #     """Log in an existing user with provided credentials.
-
-    #     Takes an instance of the LoginInput schema.
-
-    #     Returns user instance on success.
-
-    #     Raises error if credentials are incorrect:
-    #         - AuthenticationError on check_password fail
-    #         - ObjectDoesNotExist on nonexistent username
-    #     """
-
-    #     user = cls.objects.get(username=user_data.username)
-
-    #     if user.check_password(user_data.password) is True:
-    #         return user
-    #     else:
-    #         raise AuthenticationError("Unauthorized")
 
     def update(self, patch_data):
         """Update user record and return updated user instance."""
