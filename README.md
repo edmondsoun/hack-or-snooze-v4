@@ -11,43 +11,25 @@
 - Use docstrings for route descriptions (use RST for formatting)✅
 - Update name from DjangoNinja at top✅
 - Add summary of "how to use API" at top✅
-  - Doesn't need to be a hand-holdy description; just "how to use API"
-    - How do you register
-    - How do you get a token
-    - How do you use that token
 
 ## USER MODEL
 - Auth: check for built-in methods.
-  - Add contraint to password with minimum length.✅
-    - added min_length to the password field on schema
-  - Login: can we use the built in method?✅
-    - ✅Django has a built in `authenticate` method that does much of the
-      same work as what we have in our model method.
-      - `login()` in Django will allow us to create a session with the user. We
-        don't need or want to save a session, and as far as I can tell doesn't actually
-        authenticate the user anyways.
-  - Signup: can we use the built in `create_user`✅
-      - ✅now using `create_user` paired with `User.get.filter.exists`
-    Research Notes:
-        - after testing, it seems that create_user will not be a great choice since it 
-        does not check if a user already exists before running. In fact, the method will
-        mutate an existing user in this application if one already exists. We could use 
-        `User.objects.get()` and then catch the `ObjectDoesNotExist` error, but this feels
-        very gross to instantiate a new user. The way we have is working and doing mostly
-        the same thing with a more understandable pattern.
-        - Follow Up with Joel: don't take the responsibility of handling the password away from Django.
-          Another issue to consider is race conditions when creating a user. We can use `@transaction.atomic`
-          decorator to ensure that a username is not duplicated in the middle of a transaction.
+    - updated login logic to use `authenticate` from Django.✅
+    - updated signup logic to now use `create_user` paired with `User.get.filter.exists`✅
+    - removed existing `signup` and `login` model methods, logic for login/signup now lives in the route✅
 
 ## USERS ROUTES
 ### AUTH
-- Add a test that shows a hyphen/underscore is valid.✅
-  - Rename global constant from ALPHANUMERIC... to SLUGIFIED...?
-- Need to test and make totally sure they cannot sign *up* with an empty
-    fn/ln.✅
+- Add a test that shows a hyphen/underscore is valid in username.✅
+- Rename global constant from ALPHANUMERIC... to SLUGIFIED...?
+- Updated Signup validation to ensure minimum lengths for `first_name`, `last_name`,
+  and `password`✅
+  - NOTE: This validation is done at the Schema level.
+- Added test for min_length validation on signup for `first_name`, `last_name`, `password`✅
+  - NOTE: The user model is unchanged. No constraints at the model level.
 
 ### PATCH
-- Remove validation for empty string entirely✅
+- Remove validation for empty string and empty body entirely✅
   - if they really want an empty string it can be an empty string
 
 ## FAVORITES
