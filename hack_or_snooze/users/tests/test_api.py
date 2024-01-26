@@ -164,6 +164,81 @@ class APIAuthTestCase(TestCase):
             }
         )
 
+    def test_signup_fail_fields_must_meet_minimum_length(self):
+        """Test first_name, last_name, password, meet minimum length
+        requirements to register user"""
+
+        invalid_data = {
+            "username": "",
+            "first_name": "",
+            "last_name": "",
+            "password": "",
+        }
+
+        response = self.client.post(
+            '/api/users/signup',
+            data=json.dumps(invalid_data),
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 422)
+
+        self.assertJSONEqual(
+            response.content,
+            {
+                "detail": [
+                    {
+                        "type": "string_too_short",
+                        "loc": [
+                            "body",
+                            "data",
+                            "username"
+                        ],
+                        "msg": "String should have at least 2 characters",
+                        "ctx": {
+                            "min_length": 2
+                        }
+                    },
+                    {
+                        "type": "string_too_short",
+                        "loc": [
+                            "body",
+                            "data",
+                            "first_name"
+                        ],
+                        "msg": "String should have at least 2 characters",
+                        "ctx": {
+                            "min_length": 2
+                        }
+                    },
+                    {
+                        "type": "string_too_short",
+                        "loc": [
+                            "body",
+                            "data",
+                            "last_name"
+                        ],
+                        "msg": "String should have at least 2 characters",
+                        "ctx": {
+                            "min_length": 2
+                        }
+                    },
+                    {
+                        "type": "string_too_short",
+                        "loc": [
+                            "body",
+                            "data",
+                            "password"
+                        ],
+                        "msg": "String should have at least 5 characters",
+                        "ctx": {
+                            "min_length": 5
+                        }
+                    }
+                ]
+            }
+        )
+
     def test_login_ok(self):
         response = self.client.post(
             '/api/users/login',

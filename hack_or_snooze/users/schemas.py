@@ -113,6 +113,7 @@ class FavoriteDeleteInput(Schema):
 class SignupInput(ModelSchema):
     """Schema for POST /signup request body"""
 
+    username: str = Field(..., min_length=2)
     first_name: str = Field(..., min_length=2)
     last_name: str = Field(..., min_length=2)
     password: str = Field(..., min_length=5)
