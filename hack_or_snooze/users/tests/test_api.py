@@ -209,8 +209,8 @@ class APIAuthTestCase(TestCase):
             }
         )
 
-    def test_signup_fail_username_must_be_alphanumeric(self):
-        """Test username only contains alphanumeric characters, otherwise token
+    def test_signup_fail_username_must_be_slugified(self):
+        """Test username only contains slugified characters, otherwise token
         generation/validation may break."""
 
         invalid_data = {
@@ -228,7 +228,7 @@ class APIAuthTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                "detail": "Username must be alphanumeric."
+                "detail": "Username must contain only numbers, letters, underscores or hyphens."
             }
         )
 

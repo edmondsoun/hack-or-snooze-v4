@@ -11,7 +11,7 @@ from stories.schemas import StorySchema
 
 from .models import User
 
-ALPHANUMERIC_STRING_PATTERN = re.compile('^[0-9a-zA-Z-_]*$')
+SLUGIFIED_STRING_PATTERN = re.compile('^[0-9a-zA-Z-_]*$')
 
 
 ### USERS SCHEMAS ###
@@ -131,12 +131,13 @@ class SignupInput(ModelSchema):
     
     @validator('username', pre=True, check_fields=False)
     def check_username(cls, value):
-        """Check username against regex pattern for alphanumeric string.
+        """Check username against regex pattern for slugified string.
 
         Returns original value or raises InvalidUsernameException."""
 
-        if not ALPHANUMERIC_STRING_PATTERN.match(value):
-            raise InvalidUsernameException("Username must be alphanumeric.")
+        if not SLUGIFIED_STRING_PATTERN.match(value):
+            raise InvalidUsernameException(
+                "Username must contain only numbers, letters, underscores or hyphens.")
         return value
 
 
