@@ -320,21 +320,17 @@ def delete_favorite(request, username: str, data: FavoriteDeleteInput):
     if username != curr_user.username and curr_user.is_staff is not True:
         return 401, {"detail": "Unauthorized"}
 
-    # this covers the case where the curr_user is staff, but the target user
-    # does not exist
-    try:
-        user = User.objects.get(username=username)
-    except ObjectDoesNotExist:
-        return 404, {"detail": "User not found."}
+    favorite_table = User.favorites.through
+    favorite = favorite_table.objects.filter(
+        user_id=username,
+        story_id=data.story_id
+    )
 
-    story_id = data.story_id
+    if not favorite.exists():
+        return 404, {"detail": "Favorite not found."}
 
-    # TODO: Look in favorites table instead - return error "no favorite for this
-    # user"
-    try:
-        story = Story.objects.get(id=story_id)
-    except ObjectDoesNotExist:
-        return 404, {"detail": "Story not found."}
+    story = Story.objects.get(id=data.story_id)
+    user = User.objects.get(username=username)
 
     user.favorites.remove(story)
 

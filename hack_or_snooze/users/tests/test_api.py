@@ -757,124 +757,6 @@ class APIUserPatchTestCase(TestCase):
             }
         )
 
-    # def test_patch_user_does_not_patch_empty_first_name(self):
-    #     """Test to ensure that a user's first name is left unchanged if the
-    #     first_name input field is blank IE ("") an empty string"""
-
-    #     response = self.client.patch(
-    #         '/api/users/user',
-    #         data=json.dumps({
-    #             "password": "new_password",
-    #             "first_name": "",
-    #             "last_name": "newLast"
-    #         }),
-    #         headers={AUTH_KEY: self.user_token},
-    #         content_type="application/json"
-    #     )
-
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertJSONEqual(
-    #         response.content,
-    #         {
-    #             "user": {
-    #                 "stories": [],
-    #                 "favorites": [],
-    #                 "username": "user",
-    #                 "first_name": "userFirst",
-    #                 "last_name": "newLast",
-    #                 "date_joined": "2020-01-01T00:00:00Z"
-    #             }
-    #         }
-    #     )
-
-    # def test_patch_user_does_not_patch_empty_last_name(self):
-    #     """Test to ensure that a user's last name is left unchanged if the
-    #     last_name input field is blank IE ("") an empty string"""
-
-    #     response = self.client.patch(
-    #         '/api/users/user',
-    #         data=json.dumps({
-    #             "password": "new_password",
-    #             "first_name": "newFirst",
-    #             "last_name": ""
-    #         }),
-    #         headers={AUTH_KEY: self.user_token},
-    #         content_type="application/json"
-    #     )
-
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertJSONEqual(
-    #         response.content,
-    #         {
-    #             "user": {
-    #                 "stories": [],
-    #                 "favorites": [],
-    #                 "username": "user",
-    #                 "first_name": "newFirst",
-    #                 "last_name": "userLast",
-    #                 "date_joined": "2020-01-01T00:00:00Z"
-    #             }
-    #         }
-    #     )
-
-    # def test_patch_user_does_not_patch_empty_password(self):
-        # """Test to ensure that a user's password is left unchanged if the
-        # password input field is blank IE ("") an empty string"""
-
-        # response = self.client.patch(
-        #     '/api/users/user',
-        #     data=json.dumps({
-        #         "password": "",
-        #         "first_name": "newFirst",
-        #         "last_name": "newLast"
-        #     }),
-        #     headers={AUTH_KEY: self.user_token},
-        #     content_type="application/json"
-        # )
-
-        # # Assert we receive the correct response:
-        # self.assertEqual(response.status_code, 200)
-        # self.assertJSONEqual(
-        #     response.content,
-        #     {
-        #         "user": {
-        #             "stories": [],
-        #             "favorites": [],
-        #             "username": "user",
-        #             "first_name": "newFirst",
-        #             "last_name": "newLast",
-        #             "date_joined": "2020-01-01T00:00:00Z"
-        #         }
-        #     }
-        # )
-
-        # # Confirm we can log back in with the old password:
-        # #TODO: Update this, the password CAN change and should now be
-        # # able to log in with the NEW password
-        # login_response = self.client.post(
-        #     '/api/users/login',
-        #     data=json.dumps({
-        #         "username": self.user.username,
-        #         "password": FACTORY_USER_DEFAULT_PASSWORD,
-        #     }),
-        #     content_type="application/json"
-        # )
-
-        # self.assertEqual(login_response.status_code, 200)
-        # self.assertJSONEqual(
-        #     response.content,
-        #     {
-        #         "user": {
-        #             "stories": [],
-        #             "favorites": [],
-        #             "username": "user",
-        #             "first_name": "newFirst",
-        #             "last_name": "newLast",
-        #             "date_joined": "2020-01-01T00:00:00Z"
-        #         }
-        #     }
-        # )
-
     def test_patch_user_fail_unauthorized_no_token_header(self):
 
         response = self.client.patch(
@@ -1485,54 +1367,13 @@ class APIFavoriteDeleteTestCase(TestCase):
             content_type="application/json"
         )
 
-        self.assertEqual(delete_same_favorite_response.status_code, 200)
+        self.assertEqual(delete_same_favorite_response.status_code, 404)
         self.assertJSONEqual(
             delete_same_favorite_response.content,
             {
-                "user": {
-                    "stories": [],
-                    "favorites": [],
-                    "username": "user2",
-                    "first_name": "userFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
+                'detail': 'Favorite not found.'
             }
-        )
 
-    def test_delete_favorite_no_effect_on_story_not_in_favorites(self):
-
-        new_story = StoryFactory()
-
-        response = self.client.delete(
-            '/api/users/user2/favorites',
-            data=json.dumps({
-                "story_id": new_story.id
-            }),
-            headers={AUTH_KEY: self.user2_token},
-            content_type="application/json"
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(
-            response.content,
-            {
-                "user": {
-                    "stories": [],
-                    "favorites": [{
-                        'author': 'test_author',
-                        'created': '2020-01-01T00:00:00Z',
-                        'id': self.story.id,
-                        'modified': '2020-01-01T00:00:00Z',
-                        'title': 'test_title',
-                        'url': 'http://test.com',
-                        'username': 'user'
-                    }],
-                    "username": "user2",
-                    "first_name": "userFirst",
-                    "last_name": "userLast",
-                    "date_joined": "2020-01-01T00:00:00Z"
-                }
-            }
         )
 
     def test_delete_favorite_fail_unauthorized_no_token_header(self):
@@ -1643,7 +1484,7 @@ class APIFavoriteDeleteTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'User not found.'
+                'detail': 'Favorite not found.'
             }
         )
 
@@ -1661,7 +1502,7 @@ class APIFavoriteDeleteTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Story not found.'
+                'detail': 'Favorite not found.'
             }
         )
 
@@ -1679,7 +1520,7 @@ class APIFavoriteDeleteTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'detail': 'Story not found.'
+                'detail': 'Favorite not found.'
             }
         )
 
