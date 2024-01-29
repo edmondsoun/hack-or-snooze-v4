@@ -96,16 +96,16 @@ class UserPatchInput(ModelSchema):
 
 ### FAVORITES SCHEMAS ###
 
-class FavoritePostInput(Schema):
-    """Schema for POST /users/{username}/favorites response body"""
+# class FavoritePostInput(Schema):
+#     """Schema for POST /users/{username}/favorites response body"""
 
-    story_id: str
+#     story_id: str
 
 
-class FavoriteDeleteInput(Schema):
-    """Schema for DELETE /users/{username}/favorites response body"""
+# class FavoriteDeleteInput(Schema):
+#     """Schema for DELETE /users/{username}/favorites response body"""
 
-    story_id: str
+#     story_id: str
 
 
 ### AUTH SCHEMAS ###

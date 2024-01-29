@@ -15,8 +15,6 @@ from stories.models import Story
 from .schemas import (
     UserOutput,
     UserPatchInput,
-    FavoritePostInput,
-    FavoriteDeleteInput,
     SignupInput,
     LoginInput,
     AuthOutput,
@@ -218,120 +216,120 @@ def update_user(request, username: str, data: UserPatchInput):
 
 ######## FAVORITES ############################################################
 
-@router.post(
-    '/{str:username}/favorites',
-    response={
-        200: UserOutput,
-        400: BadRequest,
-        401: Unauthorized,
-        404: ObjectNotFound
-    },
-    auth=token_header
-)
-def add_favorite(request, username: str, data: FavoritePostInput):
-    """
-    Add a story to a user's favorites.
+# @router.post(
+#     '/{str:username}/favorites',
+#     response={
+#         200: UserOutput,
+#         400: BadRequest,
+#         401: Unauthorized,
+#         404: ObjectNotFound
+#     },
+#     auth=token_header
+# )
+# def add_favorite(request, username: str, data: FavoritePostInput):
+#     """
+#     Add a story to a user's favorites.
 
-    On success, returns user data with target story added to user.favorites:
+#     On success, returns user data with target story added to user.favorites:
 
-        {
-            "user": {
-                "stories": [Story, Story...],
-                "favorites": [Story, Story...],
-                "username": "test",
-                "first_name": "First",
-                "last_name": "Last",
-                "date_joined": "2000-01-01T00:00:00Z"
-            }
-        }
+#         {
+#             "user": {
+#                 "stories": [Story, Story...],
+#                 "favorites": [Story, Story...],
+#                 "username": "test",
+#                 "first_name": "First",
+#                 "last_name": "Last",
+#                 "date_joined": "2000-01-01T00:00:00Z"
+#             }
+#         }
 
-    **Authentication: token**
+#     **Authentication: token**
 
-    **Authorization: same user or admin**
-    """
+#     **Authorization: same user or admin**
+#     """
 
-    curr_user = request.auth
+#     curr_user = request.auth
 
-    if username != curr_user.username and curr_user.is_staff is not True:
-        return 401, {"detail": "Unauthorized"}
+#     if username != curr_user.username and curr_user.is_staff is not True:
+#         return 401, {"detail": "Unauthorized"}
 
-    # this covers the case where the curr_user is staff, but the target user
-    # does not exist:
-    try:
-        user = User.objects.get(username=username)
-    except ObjectDoesNotExist:
-        return 404, {"detail": "User not found."}
+#     # this covers the case where the curr_user is staff, but the target user
+#     # does not exist:
+#     try:
+#         user = User.objects.get(username=username)
+#     except ObjectDoesNotExist:
+#         return 404, {"detail": "User not found."}
 
-    story_id = data.story_id
+#     story_id = data.story_id
 
-    try:
-        story = Story.objects.get(id=story_id)
-    except ObjectDoesNotExist:
-        return 404, {"detail": "Story not found."}
+#     try:
+#         story = Story.objects.get(id=story_id)
+#     except ObjectDoesNotExist:
+#         return 404, {"detail": "Story not found."}
 
-    if story in user.stories.all():
-        return 400, {"detail": "Cannot add own user stories to favorites"}
+#     if story in user.stories.all():
+#         return 400, {"detail": "Cannot add own user stories to favorites"}
 
-    # user.favorites is a many-to-many relationship. In Django, a many-to-many
-    # field by default is constrained to only allow one instance of a
-    # relationship between the two objects
-    # calling this again, will NOT duplicate the relationship if it already
-    # exists
+#     # user.favorites is a many-to-many relationship. In Django, a many-to-many
+#     # field by default is constrained to only allow one instance of a
+#     # relationship between the two objects
+#     # calling this again, will NOT duplicate the relationship if it already
+#     # exists
 
-    user.favorites.add(story)
+#     user.favorites.add(story)
 
-    return {"user": user}
+#     return {"user": user}
 
 
-@router.delete(
-    '/{str:username}/favorites',
-    response={
-        200: UserOutput,
-        400: BadRequest,
-        401: Unauthorized,
-        404: ObjectNotFound
-    },
-    auth=token_header
-)
-def delete_favorite(request, username: str, data: FavoriteDeleteInput):
-    """
-    Delete a story from a user's favorites.
+# @router.delete(
+#     '/{str:username}/favorites',
+#     response={
+#         200: UserOutput,
+#         400: BadRequest,
+#         401: Unauthorized,
+#         404: ObjectNotFound
+#     },
+#     auth=token_header
+# )
+# def delete_favorite(request, username: str, data: FavoriteDeleteInput):
+#     """
+#     Delete a story from a user's favorites.
 
-    On success, returns user data with target story removed from the user's
-    favorites:
+#     On success, returns user data with target story removed from the user's
+#     favorites:
 
-        {
-            "user": {
-                "stories": [Story, Story...],
-                "favorites": [Story, Story...],
-                "username": "test",
-                "first_name": "First",
-                "last_name": "Last",
-                "date_joined": "2000-01-01T00:00:00Z"
-            }
-        }
+#         {
+#             "user": {
+#                 "stories": [Story, Story...],
+#                 "favorites": [Story, Story...],
+#                 "username": "test",
+#                 "first_name": "First",
+#                 "last_name": "Last",
+#                 "date_joined": "2000-01-01T00:00:00Z"
+#             }
+#         }
 
-    **Authentication: token**
+#     **Authentication: token**
 
-    **Authorization: same user or admin**
-    """
-    curr_user = request.auth
+#     **Authorization: same user or admin**
+#     """
+#     curr_user = request.auth
 
-    if username != curr_user.username and curr_user.is_staff is not True:
-        return 401, {"detail": "Unauthorized"}
+#     if username != curr_user.username and curr_user.is_staff is not True:
+#         return 401, {"detail": "Unauthorized"}
 
-    favorite_table = User.favorites.through
-    favorite = favorite_table.objects.filter(
-        user_id=username,
-        story_id=data.story_id
-    )
+#     favorite_table = User.favorites.through
+#     favorite = favorite_table.objects.filter(
+#         user_id=username,
+#         story_id=data.story_id
+#     )
 
-    if not favorite.exists():
-        return 404, {"detail": "Favorite not found."}
+#     if not favorite.exists():
+#         return 404, {"detail": "Favorite not found."}
 
-    story = Story.objects.get(id=data.story_id)
-    user = User.objects.get(username=username)
+#     story = Story.objects.get(id=data.story_id)
+#     user = User.objects.get(username=username)
 
-    user.favorites.remove(story)
+#     user.favorites.remove(story)
 
-    return {"user": user}
+#     return {"user": user}

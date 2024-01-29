@@ -2,6 +2,7 @@ from ninja import NinjaAPI
 
 from stories.api import router as stories_router
 from users.api import router as users_router
+from favorites.api import router as favorites_router
 
 from hack_or_snooze.exceptions import InvalidUsernameException
 
@@ -19,8 +20,8 @@ sending the following information:
         "password": "string"
     }
 
-Upon a successful request to that endpoint, you will receive a JSON payload that
-includes your user details as well as a token. Like so:
+Upon a successful request to that endpoint, you will receive a JSON payload
+that includes your user details as well as a token. Like so:
 
     {
         "token": "your_username:token_data"
@@ -28,13 +29,13 @@ includes your user details as well as a token. Like so:
     }
 
 With your new token, you can now use all of the endpoints that require auth
-(the endpoints marked with a lock). You will need to send this token in the 
+(the endpoints marked with a lock). You will need to send this token in the
 HEADERS of your request like so:
 
     HEADER: token: your_token
 
-You can also supply this token to the **AUTHORIZE** button located at the top of this
-documentation for usage in these interactive endpoints.
+You can also supply this token to the **AUTHORIZE** button located at the top
+of this documentation for usage in these interactive endpoints.
 
 """
 
@@ -48,6 +49,7 @@ api = NinjaAPI(
 
 api.add_router("/users/", users_router)
 api.add_router("/stories/", stories_router)
+api.add_router("/favorites/", favorites_router)
 
 
 # Handle exceptions raised in the validators themselves:
