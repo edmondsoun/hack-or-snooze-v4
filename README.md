@@ -22,8 +22,7 @@
 ### AUTH
 - Add a test that shows a hyphen/underscore is valid in username.✅
 - Rename global constant from ALPHANUMERIC... to SLUGIFIED...?
-- Updated Signup validation to ensure minimum lengths for `first_name`, `last_name`,
-  and `password`✅
+- Updated Signup validation to ensure minimum lengths for `first_name`, `last_name`, and `password`✅
   - NOTE: This validation is done at the Schema level.
 - Added test for min_length validation on signup for `first_name`, `last_name`, `password`✅
   - NOTE: The user model is unchanged. No constraints at the model level.
@@ -33,15 +32,15 @@
   - if they really want an empty string it can be an empty string
 
 ## FAVORITES
-- Create "Favorites" application
-- Create "Favorites" model and pass this model to User in ManyToManyField?
-  - Need to research this.
+- Create "Favorites" application✅
+- Create "Favorites" model and pass this model to User in ManyToManyField?❌
+  - No need, we won't be adding anything to the middle table so we can just use the `through` property on the User model to get the through table.
 
 - Restructure favorites endpoints. (Don't spend more than a day on this.)
-  - POST /favorites/{username}/{story_id}/favorite
-  - POST /favorites/{username}/{story_id}/unfavorite
-    - Throw bad request error if trying to add an existing favorite
-    - Throw bad request error if trying to delete a favorite that doesn't exist
+  - POST /favorites/{username}/{story_id}/favorite✅
+  - POST /favorites/{username}/{story_id}/unfavorite✅
+    - Throw bad request error if trying to add an existing favorite✅
+    - Throw bad request error if trying to delete a favorite that doesn't exist✅
       (look in the actual favorites table for the relationship)
 
 
