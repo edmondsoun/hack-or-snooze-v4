@@ -203,8 +203,7 @@ def update_user(request, username: str, data: UserPatchInput):
         return 401, {"detail": "Unauthorized"}
 
     # exclude_none removes any value set to None. A value may be set to None
-    # automatically by Django Ninja because the field was not provided, or by
-    # one of our additional validators:
+    # automatically by Django Ninja because the field was not provided
     patch_data = data.dict(exclude_none=True)
 
     user = get_object_or_404(User, username=username)

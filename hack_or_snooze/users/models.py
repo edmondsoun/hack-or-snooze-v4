@@ -14,21 +14,6 @@ class User(AbstractUser):
         max_length=150,
     )
 
-    # Need to set blank=False, otherwise the ModelSchema from DjangoNinja will
-    # interpret these fields as optional in the schema and coerce
-    # their value to None if not included on the request:
-    first_name = models.CharField(
-        max_length=150,
-        blank=False,
-        null=False,
-    )
-
-    last_name = models.CharField(
-        max_length=150,
-        blank=False,
-        null=False,
-    )
-
     favorites = models.ManyToManyField(
         Story,
         related_name="favorited_by",

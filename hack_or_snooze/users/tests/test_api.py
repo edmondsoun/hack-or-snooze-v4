@@ -936,6 +936,8 @@ class APIUserPatchTestCase(TestCase):
             }
         )
 
+    #TODO: Add test for patch with blank data, ie empty strings on all fields
+
 
 # class APIFavoritePostTestCase(TestCase):
 #     """Test POST /user/{username}/favorites endpoint."""
