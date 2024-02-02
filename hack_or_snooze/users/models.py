@@ -32,6 +32,7 @@ class User(AbstractUser):
     favorites = models.ManyToManyField(
         Story,
         related_name="favorited_by",
+        blank=True,
     )
 
     def update(self, patch_data):
