@@ -24,12 +24,14 @@
 - Rename global constant from ALPHANUMERIC... to SLUGIFIED...?
 - Updated Signup validation to ensure minimum lengths for `first_name`, `last_name`, and `password`✅
   - NOTE: This validation is done at the Schema level.
+  
 - Added test for min_length validation on signup for `first_name`, `last_name`, `password`✅
   - NOTE: The user model is unchanged. No constraints at the model level.
 
 ### PATCH
 - Remove validation for empty string and empty body entirely✅
   - if they really want an empty string it can be an empty string
+  - TODO:Add test for patching all user fields to be empty strings🤷‍♀️
 
 ## FAVORITES
 - Create "Favorites" application✅
