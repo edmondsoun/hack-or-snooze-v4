@@ -1,13 +1,7 @@
 from django.test import TestCase
-from django.db.utils import IntegrityError
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.contrib.auth.hashers import check_password
 
-from ninja.errors import AuthenticationError
-
-from users.models import User
 from users.factories import UserFactory
-from users.schemas import SignupInput, LoginInput
 
 
 class UserModelTestCase(TestCase):
