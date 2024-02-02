@@ -69,19 +69,11 @@ def add_favorite(request, username: str, story_id: str):
     if story in user.stories.all():
         return 400, {"detail": "Cannot add own user stories to favorites"}
 
-    isFavorited = user.favorites.through.objects.filter(
-        user_id=username,
-        story_id=story_id
-    ).exists()
+    isFavorited = User.favorites.through.objects.filter(
+        user_id=username, story_id=story_id).exists()
 
     if isFavorited:
         return 400, {"detail": "Story already favorited."}
-
-    # user.favorites is a many-to-many relationship. In Django, a many-to-many
-    # field by default is constrained to only allow one instance of a
-    # relationship between the two objects
-    # calling this again, will NOT duplicate the relationship if it already
-    # exists
 
     user.favorites.add(story)
 
@@ -98,9 +90,9 @@ def add_favorite(request, username: str, story_id: str):
     },
     auth=token_header
 )
-def delete_favorite(request, username: str, story_id: str):
+def remove_favorite(request, username: str, story_id: str):
     """
-    Delete a story from a user's favorites.
+    Remove a story from a user's favorites.
 
     On success, returns user data with target story removed from the user's
     favorites:
@@ -125,13 +117,10 @@ def delete_favorite(request, username: str, story_id: str):
     if username != curr_user.username and curr_user.is_staff is not True:
         return 401, {"detail": "Unauthorized"}
 
-    favorite_table = User.favorites.through
-    favorite = favorite_table.objects.filter(
-        user_id=username,
-        story_id=story_id
-    )
+    isFavorited = User.favorites.through.objects.filter(
+        user_id=username, story_id=story_id).exists()
 
-    if not favorite.exists():
+    if not isFavorited:
         return 404, {"detail": "Favorite not found."}
 
     story = Story.objects.get(id=story_id)
