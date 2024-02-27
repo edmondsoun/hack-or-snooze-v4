@@ -31,12 +31,9 @@
 ### PATCH
 - Remove validation for empty string and empty body entirely✅
   - if they really want an empty string it can be an empty string
-  - TODO:Add test for patching all user fields to be empty strings🤷‍♀️
 
 ## FAVORITES
 - Create "Favorites" application✅
-- Create "Favorites" model and pass this model to User in ManyToManyField?❌
-  - No need, we won't be adding anything to the middle table so we can just use the `through` property on the User model to get the through table.
 
 - Restructure favorites endpoints. (Don't spend more than a day on this.)
   - POST /favorites/{username}/{story_id}/favorite✅
