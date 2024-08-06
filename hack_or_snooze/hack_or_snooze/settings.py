@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -87,11 +88,13 @@ WSGI_APPLICATION = 'hack_or_snooze.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# Replace the SQLite DATABASES configuration with PostgreSQL:
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "hack_or_snooze",
-    }
+    'default': dj_database_url.config(
+        # Replace this value with your local database's connection string.
+        default='postgresql:///hack_or_snooze',
+        conn_max_age=600
+    )
 }
 
 
@@ -147,12 +150,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django Ninja configuration keywords
 
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
-
-
-import dj_database_url
-
-if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.config(
-        conn_max_age=500,
-        conn_health_checks=True,
-    )
