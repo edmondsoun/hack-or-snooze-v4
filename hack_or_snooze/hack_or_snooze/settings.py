@@ -14,17 +14,25 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+print("Base dir?", BASE_DIR)
 
+# Support env variables from .env file if defined
+import os
+from dotenv import load_dotenv
+env_path = load_dotenv(os.path.join(BASE_DIR, '.env'))
+load_dotenv(env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*^mf6&s=ymr(+4#5(%0!v35!q9_+fg3p88+8v6favz)f)&mp7)'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-*^mf6&s=ymr(+4#5(%0!v35!q9_+fg3p88+8v6favz)f)&mp7)')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+print("Debug?", DEBUG)
 ALLOWED_HOSTS = []
 
 
@@ -139,3 +147,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django Ninja configuration keywords
 
 FORBID_EXTRA_FIELDS_KEYWORD = "forbid"
+
+
+import dj_database_url
+
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(
+        conn_max_age=500,
+        conn_health_checks=True,
+    )
