@@ -6,44 +6,58 @@
 - `request.auth` stores the return value our ApiKey auth class (currently
   "user")
 
-# POST-CODE REVIEW NOTES
-## DOCS✅
-- Use docstrings for route descriptions (use RST for formatting)✅
-- Update name from DjangoNinja at top✅
-- Add summary of "how to use API" at top✅
+# Installation Guide:
 
-## USER MODEL
-- Auth: check for built-in methods.
-    - updated login logic to use `authenticate` from Django.✅
-    - updated signup logic to now use `create_user` paired with `User.get.filter.exists`✅
-    - removed existing `signup` and `login` model methods, logic for login/signup now lives in the route✅
+Create and activate your venv:
+```zsh
+python3 -m venv venv
+```
 
-## USERS ROUTES
-### AUTH
-- Add a test that shows a hyphen/underscore is valid in username.✅
-- Rename global constant from ALPHANUMERIC... to SLUGIFIED...?
-- Updated Signup validation to ensure minimum lengths for `first_name`, `last_name`, and `password`✅
-  - NOTE: This validation is done at the Schema level.
-  
-- Added test for min_length validation on signup for `first_name`, `last_name`, `password`✅
-  - NOTE: The user model is unchanged. No constraints at the model level.
+Install requirements:
+```zsh
+pip3 install -r requirements.txt
+```
 
-### PATCH
-- Remove validation for empty string and empty body entirely✅
-  - if they really want an empty string it can be an empty string
+Create database (via PSQL):
+```zsh
+createdb hack_or_snooze
+```
 
-## FAVORITES
-- Create "Favorites" application✅
+cd into directory containing `manage.py` and seed database:
+```zsh
+python manage.py migrate
+```
 
-- Restructure favorites endpoints. (Don't spend more than a day on this.)
-  - POST /favorites/{username}/{story_id}/favorite✅
-  - POST /favorites/{username}/{story_id}/unfavorite✅
-    - Throw bad request error if trying to add an existing favorite✅
-    - Throw bad request error if trying to delete a favorite that doesn't exist✅
-      (look in the actual favorites table for the relationship)
+Run server:
+```zsh
+python manage.py runserver
+```
 
+# How to Use This API
 
+First, start by registering a new user using the **/api/users/signup** route
+sending the following information:
 
-# NICETOHAVE for deployed version:
-- Set DB to automatically purge and reset to seed data periodically
-- Seed data for production
+    {
+        "username": "string",
+        "first_name": "string",
+        "last_name": "string",
+        "password": "string"
+    }
+
+Upon a successful request to that endpoint, you will receive a JSON payload
+that includes your user details as well as a token. Like so:
+
+    {
+        "token": "your_username:token_data"
+        "user": ...
+    }
+
+With your new token, you can now use all of the endpoints that require auth
+(the endpoints marked with a lock). You will need to send this token in the
+HEADERS of your request like so:
+
+    HEADER: token: your_token
+
+You can also supply this token to the **AUTHORIZE** button located at the top
+of this documentation for usage in these interactive endpoints.
